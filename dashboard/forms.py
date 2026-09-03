@@ -166,6 +166,7 @@ class EnrollmentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['duration'].required = False
         if self.instance and self.instance.pk:
             if isinstance(self.instance.skills, list):
                 self.fields['skills_text'].initial = ", ".join(self.instance.skills)
@@ -182,6 +183,12 @@ class EnrollmentForm(forms.ModelForm):
         if start_date and end_date:
             if end_date < start_date:
                 self.add_error('end_date', "End date cannot be before the start date.")
+            else:
+                # Auto-calculate duration days
+                calc_duration = (end_date - start_date).days
+                cleaned_data['duration'] = calc_duration
+                if self.instance:
+                    self.instance.duration = calc_duration
 
         if student and program and start_date:
             qs = Enrollment.objects.filter(student=student, program=program, start_date=start_date)
