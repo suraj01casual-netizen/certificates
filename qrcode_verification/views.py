@@ -220,7 +220,15 @@ class PublicCertificateDownloadView(View):
         if cert.status != "ISSUED":
             raise Http404("Certificate is not issued or has been revoked.")
 
-        if not cert.certificate_pdf:
+        # Verify physical file existence on disk (self-healing for ephemeral containers)
+        pdf_ready = False
+        if cert.certificate_pdf:
+            try:
+                pdf_ready = cert.certificate_pdf.storage.exists(cert.certificate_pdf.name)
+            except Exception:
+                pdf_ready = False
+
+        if not pdf_ready:
             CertificatePDFService.generate_pdf_for_certificate(cert, save=True)
             cert.refresh_from_db()
 
