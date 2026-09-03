@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Authorized Signatories - Dashboard{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="header-section">
+        <div class="title-area">
+            <h1>Authorized Signatories</h1>
+            <p class="subtitle">Manage authorized signatories, signatures, and document signing credentials.</p>
+        </div>
+        <div class="action-area">
+            <a href="{% url 'dashboard:signatory_add' %}" class="btn btn-primary btn-sm" id="btnAddSignatory">
+                + Add Signatory
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="search-card">
+        <form method="get" class="search-form" id="signatorySearchForm">
+            <div class="search-group" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="{{ search_query|default:'' }}" 
+                    placeholder="Search by name, designation, organization, or email..." 
+                    class="form-control"
+                    style="flex: 2; min-width: 200px;"
+                    id="searchSignatoryInput"
+                >
+                <select name="status" class="form-control" style="flex: 1; min-width: 130px;" onchange="this.form.submit()" id="filterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive Only</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                {% if search_query or status_filter %}
+                    <a href="{% url 'dashboard:signatory_list' %}" class="btn btn-secondary btn-sm">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Signatories Table Card -->
+    <div class="list-card">
+        {% if signatories %}
+            <div class="table-responsive">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Signatory</th>
+                            <th>Designation</th>
+                            <th>Organization</th>
+                            <th>Signature</th>
+                            <th>Usage</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for signatory in signatories %}
+                        <tr>
+                            <!-- Signatory Name & Email -->
+                            <td>
+                                <div>
+                                    <strong>{{ signatory.name }}</strong>
+                                    {% if signatory.email %}
+                                        <div style="font-size: 11px; color: #6b7280;">{{ signatory.email }}</div>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- Designation -->
+                            <td class="truncate-text" title="{{ signatory.designation }}">
+                                {{ signatory.designation }}
+                            </td>
+
+                            <!-- Organization -->
+                            <td class="truncate-text" title="{{ signatory.organization|default:'—' }}">
+                                {{ signatory.organization|default:"—" }}
+                            </td>
+
+                            <!-- Signature Preview -->
+                            <td>
+                                {% if signatory.signature_image %}
+                                    <button 
+                                        type="button" 
+                                        class="btn-action" 
+                                        style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.15rem 0.45rem;"
+                                        onclick="openSignatureModal('{{ signatory.name|escapejs }}', '{{ signatory.designation|escapejs }}', '{{ signatory.signature_image.url }}')"
+                                        title="Click to view signature"
+                                    >
+                                        <img src="{{ signatory.signature_image.url }}" alt="{{ signatory.name }}" style="max-height: 20px; max-width: 60px; object-fit: contain;">
+                                        <span style="font-size: 11px;">View</span>
+                                    </button>
+                                {% else %}
+                                    <span style="color: #9ca3af; font-size: 11px;">No signature</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Usage count -->
+                            <td>
+                                <span class="badge badge-secondary" style="font-size: 11px;">
+                                    {{ signatory.certificates_signed_count }} cert{{ signatory.certificates_signed_count|pluralize }}
+                                </span>
+                            </td>
+
+                            <!-- Status -->
+                            <td>
+                                {% if signatory.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="actions-cell">
+                                <a href="{% url 'dashboard:signatory_edit' signatory.pk %}" class="btn-action btn-view" title="Edit signatory">Edit</a>
+
+                                <!-- Toggle Active Status Form -->
+                                <form method="post" action="{% url 'dashboard:signatory_toggle_active' signatory.pk %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    {% if signatory.is_active %}
+                                        <button type="submit" class="btn-action btn-revoke" title="Deactivate signatory" style="border: 1px solid #e5e7eb;">
+                                            Deactivate
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn-action btn-view" title="Activate signatory">
+                                            Activate
+                                        </button>
+                                    {% endif %}
+                                </form>
+
+                                <!-- Delete Trigger Button -->
+                                <button 
+                                    type="button" 
+                                    class="btn-action btn-revoke" 
+                                    onclick="openDeleteModal('{{ signatory.name|escapejs }}', {{ signatory.certificates_signed_count }}, '{% url 'dashboard:signatory_delete' signatory.pk %}')"
+                                    title="Delete signatory"
+                                >
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="pagination-container">
+                    <span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ paginator.count }}</span>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li><a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">&laquo;</a></li>
+                            <li><a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">&lsaquo;</a></li>
+                        {% endif %}
+
+                        <li class="page-item active"><span class="page-link active">{{ page_obj.number }}</span></li>
+
+                        {% if page_obj.has_next %}
+                            <li><a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">&rsaquo;</a></li>
+                            <li><a href="?page={{ paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <div style="text-align: center; padding: 2.5rem 1rem;">
+                <p style="font-size: 1.75rem; margin-bottom: 0.35rem;">✍️</p>
+                {% if search_query or status_filter %}
+                    <h3 style="font-size: 0.95rem; font-weight: 600; color: #111827; margin-bottom: 0.25rem;">No signatories matched your filters</h3>
+                    <p style="font-size: 0.78rem; color: #6b7280; margin-bottom: 0.75rem;">Try modifying your search or reset the active filters.</p>
+                    <a href="{% url 'dashboard:signatory_list' %}" class="btn btn-secondary btn-sm">Reset Filters</a>
+                {% else %}
+                    <h3 style="font-size: 0.95rem; font-weight: 600; color: #111827; margin-bottom: 0.25rem;">No authorized signatories yet</h3>
+                    <p style="font-size: 0.78rem; color: #6b7280; margin-bottom: 0.75rem;">Add your institution's dean, director, or registrar to sign certificates.</p>
+                    <a href="{% url 'dashboard:signatory_add' %}" class="btn btn-primary btn-sm">+ Add Signatory</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal for Signature Preview -->
+<div class="modal-overlay" id="sigPreviewModal" onclick="closeSignatureModal(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17,24,39,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: #ffffff; border-radius: 4px; border: 1px solid #e5e7eb; width: 100%; max-width: 440px; padding: 1.25rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb;">
+            <div>
+                <h3 id="sigModalName" style="font-size: 0.95rem; font-weight: 600; color: #111827; margin: 0;">Signatory Signature</h3>
+                <p id="sigModalTitle" style="font-size: 11.5px; color: #6b7280; margin: 0;">Official Signatory</p>
+            </div>
+            <button type="button" onclick="closeSignatureModal()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #9ca3af;">&times;</button>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 1rem;">
+            <img id="sigModalImg" src="" alt="Full Signature Preview" style="max-height: 120px; max-width: 100%; object-fit: contain;">
+        </div>
+        <div style="display: flex; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSignatureModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Safe Deletion Gate -->
+<div class="modal-overlay" id="deleteConfirmModal" onclick="closeDeleteModal(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17,24,39,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: #ffffff; border-radius: 4px; border: 1px solid #e5e7eb; width: 100%; max-width: 440px; padding: 1.25rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb;">
+            <h3 id="deleteModalTitle" style="font-size: 0.95rem; font-weight: 600; color: #111827; margin: 0;">Delete Signatory</h3>
+            <button type="button" onclick="closeDeleteModal()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #9ca3af;">&times;</button>
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+            <div id="deleteSafeState" style="display: none;">
+                <p style="font-size: 12.5px; color: #374151; margin-bottom: 0.5rem;">Are you sure you want to permanently delete <strong id="deleteSignatoryName"></strong>?</p>
+                <p style="font-size: 11.5px; color: #991b1b;">This action cannot be undone.</p>
+            </div>
+
+            <div id="deleteBlockedState" style="display: none;">
+                <div style="padding: 0.75rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; margin-bottom: 0.5rem;">
+                    <strong style="color: #991b1b; font-size: 12px;">Deletion Protected:</strong>
+                    <p id="deleteBlockedMessage" style="color: #7f1d1d; font-size: 11.5px; margin: 0.25rem 0 0 0;"></p>
+                </div>
+                <p style="font-size: 11.5px; color: #6b7280;">Please deactivate the signatory instead to preserve historic certificate authenticity.</p>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <form id="deleteForm" method="post" action="" style="display: inline;">
+                {% csrf_token %}
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeDeleteModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" id="btnConfirmDelete" style="background-color: #991b1b !important; border-color: #991b1b !important;">Yes, Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openSignatureModal(name, title, imgUrl) {
+    document.getElementById('sigModalName').textContent = name;
+    document.getElementById('sigModalTitle').textContent = title;
+    document.getElementById('sigModalImg').src = imgUrl;
+    var modal = document.getElementById('sigPreviewModal');
+    modal.style.display = 'flex';
+}
+
+function closeSignatureModal(event) {
+    if (!event || event.target.id === 'sigPreviewModal' || event.target.tagName === 'BUTTON') {
+        document.getElementById('sigPreviewModal').style.display = 'none';
+    }
+}
+
+function openDeleteModal(name, certCount, deleteUrl) {
+    document.getElementById('deleteSignatoryName').textContent = name;
+    document.getElementById('deleteForm').action = deleteUrl;
+    
+    var safeState = document.getElementById('deleteSafeState');
+    var blockedState = document.getElementById('deleteBlockedState');
+    var confirmBtn = document.getElementById('btnConfirmDelete');
+
+    if (certCount > 0) {
+        safeState.style.display = 'none';
+        blockedState.style.display = 'block';
+        document.getElementById('deleteBlockedMessage').textContent = 
+            name + ' is associated with ' + certCount + ' issued certificate(s). It cannot be permanently deleted.';
+        confirmBtn.style.display = 'none';
+    } else {
+        safeState.style.display = 'block';
+        blockedState.style.display = 'none';
+        confirmBtn.style.display = 'inline-flex';
+    }
+
+    var modal = document.getElementById('deleteConfirmModal');
+    modal.style.display = 'flex';
+}
+
+function closeDeleteModal(event) {
+    if (!event || event.target.id === 'deleteConfirmModal' || event.target.tagName === 'BUTTON') {
+        document.getElementById('deleteConfirmModal').style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

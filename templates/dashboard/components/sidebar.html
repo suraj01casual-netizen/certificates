@@ -1,0 +1,133 @@
+<!-- Sidebar Navigation Component (Touches Left Screen with 0 Margin/Padding) -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <span class="logo-icon">📜</span>
+      <span class="logo-text">CertHub</span>
+    </div>
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  {% with uname=request.resolver_match.url_name|default:'' %}
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Navigation</div>
+    <ul class="nav-list">
+      <!-- 1. Dashboard -->
+      <li class="nav-item {% if uname == 'dashboard' %}active{% endif %}">
+        <a href="{% url 'dashboard' %}" class="nav-link">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-text">Dashboard</span>
+        </a>
+      </li>
+
+      <!-- 2. Certificates -->
+      <li class="nav-item {% if uname|slice:':12' == 'certificate_' and uname != 'certificate_templates' %}active{% endif %}">
+        <a href="{% url 'dashboard:certificate_list' %}" class="nav-link">
+          <span class="nav-icon">📜</span>
+          <span class="nav-text">Certificates</span>
+        </a>
+      </li>
+
+      <!-- 2b. Templates Gallery -->
+      <li class="nav-item {% if uname == 'certificate_templates' %}active{% endif %}">
+        <a href="{% url 'dashboard:certificate_templates' %}" class="nav-link">
+          <span class="nav-icon">🎨</span>
+          <span class="nav-text">Templates</span>
+        </a>
+      </li>
+
+      <!-- 3. Students -->
+      <li class="nav-item {% if uname|slice:':8' == 'student_' %}active{% endif %}">
+        <a href="{% url 'dashboard:student_list' %}" class="nav-link">
+          <span class="nav-icon">👥</span>
+          <span class="nav-text">Students</span>
+        </a>
+      </li>
+
+      <!-- 4. Programs -->
+      <li class="nav-item {% if uname|slice:':8' == 'program_' %}active{% endif %}">
+        <a href="{% url 'dashboard:program_list' %}" class="nav-link">
+          <span class="nav-icon">🎓</span>
+          <span class="nav-text">Programs</span>
+        </a>
+      </li>
+
+      <!-- 5. Enrollments -->
+      <li class="nav-item {% if uname|slice:':11' == 'enrollment_' %}active{% endif %}">
+        <a href="{% url 'dashboard:enrollment_list' %}" class="nav-link">
+          <span class="nav-icon">📝</span>
+          <span class="nav-text">Enrollments</span>
+        </a>
+      </li>
+
+      <!-- 6. Signatories -->
+      <li class="nav-item {% if uname|slice:':10' == 'signatory_' %}active{% endif %}">
+        <a href="{% url 'dashboard:signatory_list' %}" class="nav-link">
+          <span class="nav-icon">✍️</span>
+          <span class="nav-text">Signatories</span>
+        </a>
+      </li>
+
+      <!-- 7. Public Verification -->
+      <li class="nav-item {% if request.resolver_match.namespace == 'verify' %}active{% endif %}">
+        <a href="{% url 'verify:verify_search' %}" class="nav-link">
+          <span class="nav-icon">✓</span>
+          <span class="nav-text">Verification</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-section-title">Management</div>
+    <ul class="nav-list nav-list-secondary">
+      <!-- 8. Company Settings -->
+      <li class="nav-item {% if uname == 'company_settings' %}active{% endif %}">
+        <a href="{% url 'dashboard:company_settings' %}" class="nav-link">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-text">Settings</span>
+        </a>
+      </li>
+
+      <!-- 9. Audit Logs -->
+      <li class="nav-item {% if uname|slice:':10' == 'audit_log_' %}active{% endif %}">
+        <a href="{% url 'dashboard:audit_log_list' %}" class="nav-link">
+          <span class="nav-icon">📋</span>
+          <span class="nav-text">Audit Logs</span>
+        </a>
+      </li>
+
+      <!-- 10. Django Admin -->
+      {% if user.is_staff or user.is_superuser %}
+      <li class="nav-item {% if '/admin/' in request.path %}active{% endif %}">
+        <a href="{% url 'admin:index' %}" class="nav-link" target="_blank" rel="noopener">
+          <span class="nav-icon">🔐</span>
+          <span class="nav-text">Admin Panel</span>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+
+    <div class="nav-divider"></div>
+
+    <div style="padding: 0.25rem 0.5rem;">
+      <a href="{% url 'dashboard:certificate_create' %}" class="sidebar-action-btn" title="Issue a certificate">
+        <span>➕</span> Issue Certificate
+      </a>
+    </div>
+  </nav>
+  {% endwith %}
+
+  <div class="sidebar-footer">
+    <a href="{% url 'logout' %}" class="sidebar-logout-link">
+      <span>🚪</span> Log out ({{ user.username }})
+    </a>
+  </div>
+</aside>
+
+<!-- Sidebar Overlay for Mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>

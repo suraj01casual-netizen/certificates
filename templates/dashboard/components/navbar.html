@@ -1,0 +1,70 @@
+<!-- Top Navbar Component -->
+<header class="dashboard-navbar">
+  <div class="navbar-content">
+    <!-- Left: Menu Toggle & Title -->
+    <div class="navbar-left">
+      <button class="navbar-menu-toggle" id="menuToggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <span class="navbar-title">Dashboard Overview</span>
+    </div>
+
+    <!-- Center: Global Quick Search -->
+    <div class="navbar-center">
+      <form class="navbar-search" method="get" action="{% url 'dashboard:certificate_list' %}">
+        <input
+          type="text"
+          name="q"
+          class="search-input"
+          placeholder="Search certificates by ID, student, or program..."
+          aria-label="Search"
+        />
+        <button type="submit" class="search-button" aria-label="Search button">
+          🔍
+        </button>
+      </form>
+    </div>
+
+    <!-- Right: Notification & User Menu -->
+    <div class="navbar-right">
+      <div class="navbar-notifications">
+        <button class="notification-btn" aria-label="Notifications" title="System alerts">
+          🔔
+          <span class="notification-badge">{{ recent_activities|length|default:0 }}</span>
+        </button>
+      </div>
+
+      <div class="navbar-user">
+        <button class="user-menu-toggle" id="userMenuToggle" aria-label="User menu">
+          <span class="user-avatar">{{ user.first_name|default:user.email|first|upper }}</span>
+        </button>
+
+        <div class="user-menu" id="userMenu">
+          <div class="user-menu-header">
+            <p class="user-name">{{ user.get_full_name|default:user.username }}</p>
+            <p class="user-email">{{ user.email }}</p>
+          </div>
+
+          <div class="user-menu-divider"></div>
+
+          <ul class="user-menu-list">
+            <li><a href="{% url 'dashboard:company_settings' %}" class="user-menu-item">⚙️ Company Settings</a></li>
+            <li><a href="{% url 'dashboard:audit_log_list' %}" class="user-menu-item">📋 Audit Trail</a></li>
+            <li><a href="{% url 'verify:verify_search' %}" class="user-menu-item">✓ Public Verification</a></li>
+            {% if user.is_staff or user.is_superuser %}
+            <li><a href="{% url 'admin:index' %}" class="user-menu-item" target="_blank" rel="noopener">🔐 Admin Panel</a></li>
+            {% endif %}
+          </ul>
+
+          <div class="user-menu-divider"></div>
+
+          <a href="{% url 'logout' %}" class="user-menu-logout">
+            🚪 Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

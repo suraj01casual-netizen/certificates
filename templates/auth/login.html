@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign In - Certificate Platform{% endblock %}
+
+{% block content %}
+<div style="min-height: calc(100vh - 160px); display: flex; justify-content: center; align-items: center; padding: 2rem 1rem;">
+    <div class="card" style="width: 100%; max-width: 360px; padding: 1.5rem; margin-bottom: 0;">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background-color: #111827; color: #ffffff; border-radius: 4px; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.65rem;">
+                CP
+            </div>
+            <h1 style="font-size: 1.15rem; font-weight: 600; color: #111827; margin: 0;">Issuer Sign In</h1>
+            <p style="font-size: 11.5px; color: #6b7280; margin: 0.2rem 0 0 0;">Access your credential administration workspace</p>
+        </div>
+
+        {% if messages %}
+            <div style="margin-bottom: 1rem;">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" novalidate>
+            {% csrf_token %}
+
+            <div class="form-field" style="margin-bottom: 0.85rem;">
+                <label for="email" class="form-label">Email Address</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="e.g. admin@certificate-platform.local"
+                    class="form-control"
+                    required
+                    autofocus
+                    autocomplete="email"
+                />
+            </div>
+
+            <div class="form-field" style="margin-bottom: 0.85rem;">
+                <label for="password" class="form-label">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your account password"
+                    class="form-control"
+                    required
+                    autocomplete="current-password"
+                />
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 1.25rem;">
+                <input type="checkbox" id="remember" name="remember" style="width: auto; cursor: pointer;" />
+                <label for="remember" style="margin: 0; font-size: 11.5px; color: #4b5563; cursor: pointer; text-transform: none; font-weight: 400;">
+                    Keep me signed in
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.45rem; font-size: 12.5px;">
+                Sign In to Dashboard
+            </button>
+        </form>
+
+        <div style="margin-top: 1.25rem; padding: 0.65rem 0.75rem; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 11px; color: #4b5563;">
+            <strong style="color: #111827; display: block; margin-bottom: 0.15rem;">Default Administrator</strong>
+            Account registered under <code style="font-size: 11px; background: #ffffff; padding: 0.1rem 0.3rem; border: 1px solid #e5e7eb; border-radius: 2px;">admin@certificate-platform.local</code>
+        </div>
+
+        <div style="text-align: center; margin-top: 1rem; font-size: 11.5px;">
+            <a href="{% url 'verify:verify_search' %}" style="color: #6b7280;">&larr; Verify a certificate publicly</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

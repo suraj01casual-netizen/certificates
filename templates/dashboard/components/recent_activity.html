@@ -1,0 +1,36 @@
+<!-- Recent Activity Component -->
+<div class="activity-section">
+  <div class="activity-header">
+    <h2 class="section-title">Recent System Activity</h2>
+    <a href="{% url 'dashboard:audit_log_list' %}" class="activity-view-all">View audit logs &rarr;</a>
+  </div>
+
+  <div class="activity-feed">
+    {% if recent_activities %}
+      <div class="activity-timeline">
+        {% for activity in recent_activities %}
+          <div class="activity-timeline-item">
+            <div class="activity-dot-indicator action-{{ activity.action|lower }}"></div>
+            <div class="activity-detail-content">
+              <div class="activity-main-line">
+                <span class="activity-badge badge-{{ activity.action|lower }}">{{ activity.get_action_display|default:activity.action }}</span>
+                <span class="activity-object-info">{{ activity.object_type }}: <code>{{ activity.object_id|truncatechars:20 }}</code></span>
+              </div>
+              <div class="activity-meta-line">
+                <span class="activity-user">{{ activity.user_email|default:"System" }}</span>
+                <span class="activity-sep">&bull;</span>
+                <span class="activity-time">{{ activity.timestamp|date:"M d, H:i" }}</span>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="activity-empty-state">
+        <p class="activity-empty-icon">📭</p>
+        <p class="activity-empty-text">No activity yet</p>
+        <p class="activity-empty-hint">Your activity will appear here as you interact with the system</p>
+      </div>
+    {% endif %}
+  </div>
+</div>

@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block title %}Certificate Details - {{ certificate.certificate_id }}{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="navigation-link">
+        <a href="{% url 'dashboard:certificate_list' %}" class="back-link">&larr; Back to Certificate Directory</a>
+    </div>
+
+    <div class="detail-card">
+        <!-- Header -->
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem; align-items: flex-start;">
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <div style="width: 38px; height: 38px; border-radius: 4px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                    📜
+                </div>
+                <div>
+                    <h1 style="font-size: 1.15rem; font-weight: 600; color: #111827; margin: 0;">{{ certificate.student.full_name }}</h1>
+                    <div style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.2rem;">
+                        <span class="id-cell"><code>{{ certificate.certificate_id }}</code></span>
+                        {% if certificate.status == 'ISSUED' %}
+                            <span class="badge badge-success">Issued</span>
+                        {% elif certificate.status == 'REVOKED' %}
+                            <span class="badge badge-danger">Revoked</span>
+                        {% elif certificate.status == 'EXPIRED' %}
+                            <span class="badge badge-warning">Expired</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Draft</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
+                {% if certificate.certificate_pdf and certificate.status == 'ISSUED' %}
+                    <a href="{% url 'dashboard:certificate_download' certificate.pk %}" class="btn btn-primary btn-sm" target="_blank">
+                        📥 Download PDF
+                    </a>
+                {% endif %}
+                <a href="{% url 'dashboard:certificate_html_preview' certificate.pk %}" class="btn btn-secondary btn-sm" target="_blank">
+                    🖥 Live Preview
+                </a>
+                <a href="{% url 'verify:verify_token' certificate.verification_token %}" class="btn btn-secondary btn-sm" target="_blank">
+                    🔍 Public Verification
+                </a>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyVerificationUrl('{{ verification_url }}')">
+                    🔗 Copy URL
+                </button>
+                {% if certificate.status == 'ISSUED' %}
+                    <form method="post" action="{% url 'dashboard:certificate_resend_email' certificate.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            ✉ Resend Email
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'dashboard:certificate_regenerate_pdf' certificate.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            🔄 Regenerate PDF
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-action btn-revoke" onclick="openRevokeModal()">
+                        ✕ Revoke
+                    </button>
+                {% endif %}
+                {% if certificate.status == 'DRAFT' %}
+                    <form method="post" action="{% url 'dashboard:certificate_issue_draft' certificate.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-sm">⚡ Issue Certificate</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Revocation Notice Banner (if revoked) -->
+        {% if certificate.status == 'REVOKED' %}
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
+                <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+                    <span style="font-size: 1.15rem;">⚠️</span>
+                    <div>
+                        <strong style="color: #991b1b; font-size: 12.5px;">This Certificate Has Been Revoked</strong>
+                        <p style="color: #7f1d1d; font-size: 11.5px; margin: 0.15rem 0 0 0;">
+                            <strong>Reason:</strong> {{ certificate.revocation_reason }} &middot; <span style="color: #9ca3af;">{{ certificate.revoked_at|date:"M d, Y, H:i" }}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Verification Anchor & QR Preview -->
+        <div style="display: flex; gap: 1.25rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center;">
+            <div style="text-align: center;">
+                {% if certificate.qr_code %}
+                    <img src="{{ certificate.qr_code.url }}" width="84" height="84" alt="QR Code" style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px;" />
+                {% else %}
+                    <div style="width: 84px; height: 84px; border: 1px dashed #d1d5db; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10.5px; color: #9ca3af;">No QR</div>
+                {% endif %}
+            </div>
+            <div style="flex: 1; min-width: 240px;">
+                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #6b7280; letter-spacing: 0.04em;">Verification Anchor</div>
+                <div style="font-family: monospace; font-size: 11.5px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 3px; padding: 0.25rem 0.5rem; margin: 0.25rem 0; word-break: break-all; color: #111827;">
+                    {{ certificate.verification_token }}
+                </div>
+                <div style="display: flex; gap: 0.35rem; align-items: center; margin-top: 0.35rem;">
+                    <input type="text" value="{{ verification_url }}" readonly class="form-control" style="font-size: 11.5px; padding: 0.2rem 0.45rem;" id="verificationUrlInput" />
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="copyVerificationUrl('{{ verification_url }}')">Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inline Live Preview (collapsed by default) -->
+        <div style="margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; margin: 0;">Certificate Preview</h2>
+                    <div id="previewZoomControls" style="display: none; align-items: center; gap: 0.35rem;">
+                        <span style="font-size: 11px; color: #6b7280; font-weight: 500;">Size:</span>
+                        <div style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #d1d5db;">
+                            <button type="button" id="zoomBtnSmall" onclick="setPreviewSize(0.48)" style="padding: 2px 8px; font-size: 10.5px; border: none; background: #ffffff; color: #374151; cursor: pointer;">Compact (48%)</button>
+                            <button type="button" id="zoomBtnMedium" onclick="setPreviewSize(0.58)" style="padding: 2px 8px; font-size: 10.5px; border: none; border-left: 1px solid #d1d5db; background: #2563eb; color: #ffffff; font-weight: 600; cursor: pointer;">Default (58%)</button>
+                            <button type="button" id="zoomBtnLarge" onclick="setPreviewSize(0.72)" style="padding: 2px 8px; font-size: 10.5px; border: none; border-left: 1px solid #d1d5db; background: #ffffff; color: #374151; cursor: pointer;">Large (72%)</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="togglePreviewBtn" onclick="toggleCertPreview()" class="btn btn-secondary btn-sm" style="font-size: 11px;">Show Preview</button>
+            </div>
+            <div id="certPreviewPanel" style="display: none; background: #334155; border-radius: 6px; padding: 1rem; overflow: hidden; justify-content: center; align-items: flex-start;">
+                <div id="previewScaleWrapper" style="position: relative; width: 1122px; height: 795px; transform-origin: top center; flex-shrink: 0;">
+                    <iframe
+                        id="certDetailPreviewFrame"
+                        src=""
+                        data-src="{% url 'dashboard:certificate_html_preview' certificate.pk %}"
+                        style="width: 1122px; height: 795px; border: none; background: #ffffff; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.35); border-radius: 2px;"
+                        frameborder="0"
+                        scrolling="no"
+                    ></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recipient & Program Information -->
+        <div style="margin-bottom: 1.25rem;">
+            <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                Recipient &amp; Program Details
+            </h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Student Name</span>
+                    <span class="info-value"><strong>{{ certificate.student.full_name }}</strong></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Student ID</span>
+                    <span class="info-value"><code style="background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 2px;">{{ certificate.student.student_id }}</code></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Program Name</span>
+                    <span class="info-value">{{ certificate.program.name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Certificate Type</span>
+                    <span class="info-value">{{ certificate.get_certificate_type_display }}</span>
+                </div>
+                {% if certificate.enrollment and certificate.enrollment.department %}
+                    <div class="info-item">
+                        <span class="info-label">Department</span>
+                        <span class="info-value">{{ certificate.enrollment.department }}</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Dates & Authority -->
+        <div style="margin-bottom: 1.25rem;">
+            <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                Issuance &amp; Verification Authority
+            </h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Issue Date</span>
+                    <span class="info-value">{{ certificate.issue_date|date:"F d, Y" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Duration</span>
+                    <span class="info-value">{{ certificate.duration }} Days</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Dates Covered</span>
+                    <span class="info-value">{{ certificate.start_date|date:"M d, Y" }} &ndash; {% if certificate.end_date %}{{ certificate.end_date|date:"M d, Y" }}{% else %}N/A{% endif %}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Template Design</span>
+                    <span class="info-value">{{ certificate.template.name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Signatory</span>
+                    <span class="info-value">{{ certificate.authorized_signatory.name|default:"Institutional Authority" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email Status</span>
+                    <span class="info-value">
+                        {% if certificate.email_sent %}
+                            <span style="color: #111827; font-weight: 500;">✓ Delivered ({{ certificate.email_sent_at|date:"M d, Y" }})</span>
+                        {% else %}
+                            <span style="color: #9ca3af;">Not Sent</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills (if present) -->
+        {% if certificate.enrollment and certificate.enrollment.skills or certificate.program.skills %}
+            <div>
+                <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                    Assessed Skills &amp; Proficiencies
+                </h2>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                    {% for skill in certificate.enrollment.skills|default:certificate.program.skills %}
+                        <span class="badge badge-secondary">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Revocation Confirmation Modal -->
+<div id="revokeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17,24,39,0.5); z-index: 1000; align-items: center; justify-content: center;" onclick="closeRevokeModal(event)">
+    <div style="background: #ffffff; border-radius: 4px; border: 1px solid #e5e7eb; width: 100%; max-width: 440px; padding: 1.25rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb;">
+            <h3 style="font-size: 0.95rem; font-weight: 600; color: #111827; margin: 0;">Revoke Certificate: {{ certificate.certificate_id }}</h3>
+            <button type="button" onclick="closeRevokeModal()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #9ca3af;">&times;</button>
+        </div>
+        <form method="post" action="{% url 'dashboard:certificate_revoke' certificate.pk %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 1rem;">
+                <div style="padding: 0.65rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; margin-bottom: 0.75rem; font-size: 11.5px; color: #991b1b;">
+                    <strong>Notice:</strong> Revoking this certificate will immediately update the public verification page to REVOKED and disable PDF downloads.
+                </div>
+                <label for="revocationReasonInput" class="form-label">
+                    Revocation Reason *
+                </label>
+                <textarea 
+                    id="revocationReasonInput" 
+                    name="revocation_reason" 
+                    rows="3" 
+                    class="form-control" 
+                    placeholder="Official reason for revocation..." 
+                    required
+                ></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.35rem;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeRevokeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="background-color: #991b1b !important; border-color: #991b1b !important;">Confirm Revocation</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function copyVerificationUrl(url) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function() {
+            alert('Verification URL copied to clipboard.');
+        });
+    } else {
+        var input = document.getElementById('verificationUrlInput');
+        input.select();
+        document.execCommand('copy');
+        alert('Verification URL copied to clipboard.');
+    }
+}
+
+function openRevokeModal() {
+    var modal = document.getElementById('revokeModal');
+    modal.style.display = 'flex';
+}
+
+function closeRevokeModal(event) {
+    if (!event || event.target.id === 'revokeModal' || event.target.tagName === 'BUTTON') {
+        document.getElementById('revokeModal').style.display = 'none';
+    }
+}
+
+// ── Inline certificate preview ─────────────────────────────────────
+var currentPreviewScale = 0.58;
+
+function setPreviewSize(targetScale) {
+    currentPreviewScale = targetScale;
+    ['Small', 'Medium', 'Large'].forEach(function(s) {
+        var btn = document.getElementById('zoomBtn' + s);
+        if (btn) {
+            btn.style.background = '#ffffff';
+            btn.style.color = '#374151';
+            btn.style.fontWeight = 'normal';
+        }
+    });
+    var activeId = targetScale <= 0.50 ? 'zoomBtnSmall' : (targetScale <= 0.65 ? 'zoomBtnMedium' : 'zoomBtnLarge');
+    var activeBtn = document.getElementById(activeId);
+    if (activeBtn) {
+        activeBtn.style.background = '#2563eb';
+        activeBtn.style.color = '#ffffff';
+        activeBtn.style.fontWeight = '600';
+    }
+    scaleCertPreview();
+}
+
+function toggleCertPreview() {
+    var panel = document.getElementById('certPreviewPanel');
+    var btn = document.getElementById('togglePreviewBtn');
+    var zoomControls = document.getElementById('previewZoomControls');
+    var frame = document.getElementById('certDetailPreviewFrame');
+    if (panel.style.display === 'none') {
+        panel.style.display = 'flex';
+        if (zoomControls) zoomControls.style.display = 'inline-flex';
+        btn.textContent = 'Hide Preview';
+        // Load the preview HTML if not loaded yet via fetch + srcdoc to avoid any X-Frame-Options blocking
+        if (!frame.dataset.loaded) {
+            frame.dataset.loaded = 'true';
+            var url = frame.getAttribute('data-src');
+            fetch(url)
+                .then(function(res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.text();
+                })
+                .then(function(html) {
+                    frame.srcdoc = html;
+                })
+                .catch(function(err) {
+                    console.warn('Fetch fallback to src:', err);
+                    frame.src = url;
+                });
+        }
+        scaleCertPreview();
+    } else {
+        panel.style.display = 'none';
+        if (zoomControls) zoomControls.style.display = 'none';
+        btn.textContent = 'Show Preview';
+    }
+}
+
+function scaleCertPreview() {
+    var wrapper = document.getElementById('previewScaleWrapper');
+    var container = document.getElementById('certPreviewPanel');
+    if (!wrapper || !container) return;
+    var containerWidth = container.clientWidth - 40;
+    // Cap at currentPreviewScale (default 0.58 = ~650px wide), adapting down if screen is narrower
+    var fitScale = Math.max(0.1, containerWidth / 1122);
+    var scale = Math.min(currentPreviewScale, fitScale);
+    wrapper.style.transform = 'scale(' + scale + ')';
+    var scaledHeight = Math.round(795 * scale);
+    var heightDiff = 795 - scaledHeight;
+    wrapper.style.marginBottom = '-' + heightDiff + 'px';
+}
+window.addEventListener('resize', scaleCertPreview);
+</script>
+{% endblock %}

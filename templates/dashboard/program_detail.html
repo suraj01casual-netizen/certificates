@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Program Details - {{ program.name }}{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="navigation-link">
+        <a href="{% url 'dashboard:program_list' %}" class="back-link">&larr; Back to Program Directory</a>
+    </div>
+
+    <div class="detail-card">
+        <!-- Header -->
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <div style="width: 38px; height: 38px; border-radius: 4px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                    🎓
+                </div>
+                <div>
+                    <h1 style="font-size: 1.15rem; font-weight: 600; color: #111827; margin: 0;">{{ program.name }}</h1>
+                    <div style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.2rem;">
+                        <span class="id-cell"><code>{{ program.program_id }}</code></span>
+                        {% if program.is_active %}
+                            <span class="badge badge-success">Active</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <a href="{% url 'dashboard:program_edit' program.pk %}" class="btn btn-primary btn-sm">Edit Details</a>
+                <a href="{% url 'dashboard:program_toggle_active' program.pk %}" class="btn btn-action btn-revoke">
+                    {% if program.is_active %}Deactivate{% else %}Activate{% endif %}
+                </a>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Basic Information -->
+            <div>
+                <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                    Basic Information
+                </h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Program Type</span>
+                        <span class="info-value">{{ program.get_program_type_display }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Duration</span>
+                        <span class="info-value">{{ program.duration }} Days</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Delivery Mode</span>
+                        <span class="info-value">{{ program.get_mode_display }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Department</span>
+                        <span class="info-value">{{ program.department|default:"—" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Mentor</span>
+                        <span class="info-value">{{ program.mentor|default:"—" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Registered On</span>
+                        <span class="info-value">{{ program.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            {% if program.description %}
+                <div>
+                    <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                        Description
+                    </h2>
+                    <p style="font-size: 12.5px; line-height: 1.5; color: #374151; background-color: #f9fafb; padding: 0.75rem; border-radius: 4px; border: 1px solid #e5e7eb; margin: 0;">
+                        {{ program.description|linebreaksbr }}
+                    </p>
+                </div>
+            {% endif %}
+
+            <!-- Skills Covered -->
+            {% if program.skills %}
+                <div>
+                    <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                        Curriculum Skills &amp; Proficiencies
+                    </h2>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                        {% for skill in program.skills %}
+                            <span class="badge badge-secondary">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

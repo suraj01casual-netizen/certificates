@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Enrollments - Certificate Platform{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="header-section">
+        <div class="title-area">
+            <h1>Enrollment Directory</h1>
+            <p class="subtitle">Manage student enrollments and internship records.</p>
+        </div>
+        <div class="action-area">
+            <a href="{% url 'dashboard:enrollment_add' %}" class="btn btn-primary btn-sm">+ Add Enrollment</a>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-card">
+        <form method="get" action="{% url 'dashboard:enrollment_list' %}" class="search-form">
+            <div class="search-group" style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" name="q" value="{{ q }}" placeholder="Search Enrollment ID, Student Name, Email, Program, or Project..." class="form-control" style="flex: 1;">
+                <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                {% if q %}
+                    <a href="{% url 'dashboard:enrollment_list' %}" class="btn btn-secondary btn-sm">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Enrollment List Content (Single-Row Format) -->
+    <div class="list-card">
+        {% if enrollments %}
+            <div class="table-responsive">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Enrollment ID</th>
+                            <th>Student</th>
+                            <th>Program</th>
+                            <th>Project Title</th>
+                            <th>Mentor</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in enrollments %}
+                            <tr>
+                                <td class="id-cell"><code>{{ enrollment.enrollment_id }}</code></td>
+                                <td class="name-cell"><strong>{{ enrollment.student.full_name }}</strong></td>
+                                <td class="truncate-text" title="{{ enrollment.program.name }}">{{ enrollment.program.name }}</td>
+                                <td class="truncate-text" title="{{ enrollment.project_title }}">{{ enrollment.project_title|default:"—" }}</td>
+                                <td>{{ enrollment.mentor|default:"—" }}</td>
+                                <td>
+                                    <span class="badge badge-info">{{ enrollment.get_status_display }}</span>
+                                </td>
+                                <td class="actions-cell">
+                                    <a href="{% url 'dashboard:enrollment_detail' enrollment.pk %}" class="btn-action btn-view" title="Inspect">Inspect</a>
+                                    <a href="{% url 'dashboard:enrollment_edit' enrollment.pk %}" class="btn-action btn-view" title="Edit enrollment">Edit</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="pagination-container">
+                    <span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ paginator.count }}</span>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li><a href="?page=1{% if q %}&q={{ q }}{% endif %}" class="page-link">&laquo;</a></li>
+                            <li><a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" class="page-link">&lsaquo;</a></li>
+                        {% endif %}
+
+                        <li class="page-item active"><span class="page-link active">{{ page_obj.number }}</span></li>
+
+                        {% if page_obj.has_next %}
+                            <li><a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}" class="page-link">&rsaquo;</a></li>
+                            <li><a href="?page={{ paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}" class="page-link">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <div class="empty-state" style="text-align: center; padding: 2.5rem 1rem;">
+                <p style="font-size: 1.75rem; margin-bottom: 0.35rem;">📝</p>
+                <h3 style="font-size: 0.95rem; font-weight: 600; color: #0f172a; margin-bottom: 0.25rem;">No enrollments found</h3>
+                <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 0.75rem;">Enroll a student into a program to get started.</p>
+                <a href="{% url 'dashboard:enrollment_add' %}" class="btn btn-primary btn-sm">+ Add Enrollment</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if is_edit %}Edit Signatory - {{ signatory.name }}{% else %}Add Authorized Signatory{% endif %} - Dashboard
+{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="navigation-link">
+        <a href="{% url 'dashboard:signatory_list' %}" class="back-link">&larr; Back to Authorized Signatories</a>
+    </div>
+
+    <div class="form-card">
+        <div class="card-header">
+            <div>
+                <h1>{% if is_edit %}Edit Authorized Signatory{% else %}Add Authorized Signatory{% endif %}</h1>
+                <p class="subtitle">
+                    {% if is_edit %}
+                        Update credentials, designation, or replace the signature image for {{ signatory.name }}.
+                    {% else %}
+                        Register a new authorized signatory who can sign certificates and verify credentials.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="signatoryForm">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-grid">
+                <!-- Signatory Profile Details -->
+                <div class="form-section">
+                    <h2>Signatory Information</h2>
+
+                    <div class="form-field">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Signatory Name *</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="field-errors">
+                                {% for error in form.name.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="font-size: 11px; color: #6b7280;">Full legal name as it should appear on official certificates.</small>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Designation / Title *</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="field-errors">
+                                {% for error in form.title.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="font-size: 11px; color: #6b7280;">e.g., Director &amp; CEO, Dean of Academic Affairs, Registrar.</small>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.organization.id_for_label }}" class="form-label">Organization (Optional)</label>
+                        {{ form.organization }}
+                        {% if form.organization.errors %}
+                            <div class="field-errors">
+                                {% for error in form.organization.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="font-size: 11px; color: #6b7280;">Leave blank to use default organization from Company Settings.</small>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">Email Address (Optional)</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="field-errors">
+                                {% for error in form.email.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Signature Image & Status -->
+                <div class="form-section">
+                    <h2>Official Signature &amp; Status</h2>
+
+                    <div class="form-field">
+                        <label for="{{ form.signature_image.id_for_label }}" class="form-label">
+                            Signature Image {% if not is_edit %}*{% else %}(Optional Replacement){% endif %}
+                        </label>
+                        {{ form.signature_image }}
+                        {% if form.signature_image.errors %}
+                            <div class="field-errors">
+                                {% for error in form.signature_image.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="font-size: 11px; color: #6b7280;">PNG recommended with transparent background (max 2MB).</small>
+
+                        {% if is_edit and signatory.signature_image %}
+                            <div style="margin-top: 0.5rem; padding: 0.5rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.75rem;">
+                                <img src="{{ signatory.signature_image.url }}" alt="Current Signature" style="max-height: 40px; max-width: 120px; object-fit: contain;">
+                                <span style="font-size: 11.5px; color: #4b5563;">Current signature file on record</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field" style="flex-direction: row; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                        {{ form.is_active }}
+                        <label for="{{ form.is_active.id_for_label }}" style="margin: 0; cursor: pointer; text-transform: none; font-size: 12.5px; font-weight: 500;">
+                            Active Signatory (Eligible to sign new certificates)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'dashboard:signatory_list' %}" class="btn btn-secondary btn-sm">Cancel</a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    {% if is_edit %}Save Changes{% else %}Create Signatory{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

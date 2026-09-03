@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Students - Certificate Platform{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="header-section">
+        <div class="title-area">
+            <h1>Student Directory</h1>
+            <p class="subtitle">Manage, view, and search registered student profiles.</p>
+        </div>
+        <div class="action-area">
+            <a href="{% url 'dashboard:student_add' %}" class="btn btn-primary btn-sm">+ Add Student</a>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-card">
+        <form method="get" action="{% url 'dashboard:student_list' %}" class="search-form">
+            <div class="search-group" style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" name="q" value="{{ q }}" placeholder="Search by ID, Name, Email, Phone, or College..." class="form-control" style="flex: 1;">
+                <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                {% if q %}
+                    <a href="{% url 'dashboard:student_list' %}" class="btn btn-secondary btn-sm">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Student List Content -->
+    <div class="list-card">
+        {% if students %}
+            <div class="table-responsive">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>College</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                            <tr>
+                                <td class="id-cell"><code>{{ student.student_id }}</code></td>
+                                <td class="name-cell"><strong>{{ student.full_name }}</strong></td>
+                                <td>{{ student.email }}</td>
+                                <td>{{ student.phone|default:"—" }}</td>
+                                <td class="truncate-text" title="{{ student.college }}">{{ student.college|default:"—" }}</td>
+                                <td>
+                                    {% if student.is_active %}
+                                        <span class="badge badge-success">Active</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="actions-cell">
+                                    <a href="{% url 'dashboard:student_detail' student.pk %}" class="btn-action btn-view" title="View details">Inspect</a>
+                                    <a href="{% url 'dashboard:student_edit' student.pk %}" class="btn-action btn-view" title="Edit student">Edit</a>
+                                    {% if student.is_active %}
+                                        <a href="{% url 'dashboard:student_deactivate' student.pk %}" class="btn-action btn-revoke" title="Deactivate student">Deactivate</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="pagination-container">
+                    <span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ paginator.count }}</span>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li><a href="?page=1{% if q %}&q={{ q }}{% endif %}" class="page-link">&laquo;</a></li>
+                            <li><a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" class="page-link">&lsaquo;</a></li>
+                        {% endif %}
+
+                        <li class="page-item active"><span class="page-link active">{{ page_obj.number }}</span></li>
+
+                        {% if page_obj.has_next %}
+                            <li><a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}" class="page-link">&rsaquo;</a></li>
+                            <li><a href="?page={{ paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}" class="page-link">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <div class="empty-state" style="text-align: center; padding: 2.5rem 1rem;">
+                <p style="font-size: 1.75rem; margin-bottom: 0.35rem;">👥</p>
+                {% if q %}
+                    <h3 style="font-size: 0.95rem; font-weight: 600; color: #0f172a; margin-bottom: 0.25rem;">No students found matching "{{ q }}"</h3>
+                    <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 0.75rem;">Try a different search term or clear the filter.</p>
+                    <a href="{% url 'dashboard:student_list' %}" class="btn btn-secondary btn-sm">Clear Search</a>
+                {% else %}
+                    <h3 style="font-size: 0.95rem; font-weight: 600; color: #0f172a; margin-bottom: 0.25rem;">No students registered yet</h3>
+                    <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 0.75rem;">Get started by enrolling your first student.</p>
+                    <a href="{% url 'dashboard:student_add' %}" class="btn btn-primary btn-sm">+ Add Student</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

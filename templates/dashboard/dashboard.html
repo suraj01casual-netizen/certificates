@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - Certificate Platform{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
+        <p>Dashboard</p>
+    </div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="dashboard-content">
+        <div class="user-info-card">
+            <h2>User Information</h2>
+            <div class="info-row">
+                <span class="label">Name:</span>
+                <span class="value">{{ user.get_full_name|default:user.username }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ user.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Account Status:</span>
+                <span class="value">
+                    {% if user.is_active %}
+                        <span class="badge badge-success">Active</span>
+                    {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Account Type:</span>
+                <span class="value">
+                    {% if user.is_staff %}
+                        <span class="badge badge-info">Staff</span>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                        <span class="badge badge-warning">Administrator</span>
+                    {% endif %}
+                    {% if not user.is_staff and not user.is_superuser %}
+                        <span class="badge badge-secondary">User</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Joined:</span>
+                <span class="value">{{ user.date_joined|date:"F d, Y" }}</span>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="action-grid">
+                {% if user.is_staff or user.is_superuser %}
+                    <a href="{% url 'admin:index' %}" class="action-card">
+                        <div class="action-icon">📊</div>
+                        <div class="action-name">Admin Panel</div>
+                    </a>
+                {% endif %}
+                <a href="#" class="action-card disabled">
+                    <div class="action-icon">📜</div>
+                    <div class="action-name">My Certificates</div>
+                </a>
+                <a href="{% url 'dashboard:signatory_list' %}" class="action-card">
+                    <div class="action-icon">✍️</div>
+                    <div class="action-name">Signatories</div>
+                </a>
+                <a href="{% url 'dashboard:company_settings' %}" class="action-card">
+                    <div class="action-icon">⚙️</div>
+                    <div class="action-name">Company Settings</div>
+                </a>
+                <a href="{% url 'logout' %}" class="action-card logout">
+                    <div class="action-icon">🚪</div>
+                    <div class="action-name">Logout</div>
+                </a>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2>Getting Started</h2>
+            <div class="help-items">
+                <div class="help-item">
+                    <h3>📚 Overview</h3>
+                    <p>Welcome to the Certificate Platform. This system allows you to manage and verify digital certificates.</p>
+                </div>
+                <div class="help-item">
+                    <h3>🔐 Security</h3>
+                    <p>Your account is protected. Always keep your password secure and never share it with anyone.</p>
+                </div>
+                <div class="help-item">
+                    <h3>❓ Need Help?</h3>
+                    <p>Contact the administrator for assistance with your account or certificate-related inquiries.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2rem;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .dashboard-header p {
+        color: #7f8c8d;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .dashboard-content {
+        display: grid;
+        gap: 2rem;
+    }
+
+    .user-info-card,
+    .quick-actions,
+    .help-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info-card h2,
+    .quick-actions h2,
+    .help-section h2 {
+        margin-top: 0;
+        color: #2c3e50;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 1rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-row .label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .info-row .value {
+        color: #7f8c8d;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .badge-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .badge-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .badge-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-secondary {
+        background-color: #e2e3e5;
+        color: #383d41;
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .action-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px;
+        text-decoration: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .action-card.disabled {
+        background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+        cursor: not-allowed;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .action-card.logout {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    }
+
+    .action-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .help-items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .help-item {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border-left: 4px solid #667eea;
+    }
+
+    .help-item h3 {
+        margin-top: 0;
+        color: #2c3e50;
+    }
+
+    .help-item p {
+        margin: 0.5rem 0 0 0;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .action-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}

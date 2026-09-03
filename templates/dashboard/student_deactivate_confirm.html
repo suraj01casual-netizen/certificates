@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Deactivate Student - {{ student.full_name }}{% endblock %}
+
+{% block content %}
+<div class="student-management-container" style="max-width: 520px; margin: 2rem auto;">
+    <div class="form-card" style="text-align: center;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚠️</div>
+        <h1 style="font-size: 1.25rem; font-weight: 600; color: #111827; margin: 0 0 0.4rem 0;">Deactivate Student Profile</h1>
+        <p style="font-size: 12.5px; color: #4b5563; margin-bottom: 1rem;">
+            Are you sure you want to deactivate <strong>{{ student.full_name }}</strong>?
+        </p>
+
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.75rem 1rem; margin-bottom: 1rem; text-align: left;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 0.25rem;">
+                <span style="color: #6b7280;">Student ID:</span>
+                <span class="id-cell"><code>{{ student.student_id }}</code></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 0.25rem;">
+                <span style="color: #6b7280;">Email:</span>
+                <span style="color: #111827; font-weight: 500;">{{ student.email }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                <span style="color: #6b7280;">College:</span>
+                <span style="color: #111827;">{{ student.college|default:"—" }}</span>
+            </div>
+        </div>
+
+        <p style="font-size: 11.5px; color: #6b7280; margin-bottom: 1.25rem;">
+            Deactivation flags this student as Inactive. Historical certificates remain verifiable. You can reactivate this profile anytime.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; justify-content: center; gap: 0.5rem;">
+                <a href="{% url 'dashboard:student_detail' student.pk %}" class="btn btn-secondary btn-sm">No, Keep Active</a>
+                <button type="submit" class="btn btn-primary btn-sm" style="background-color: #991b1b !important; border-color: #991b1b !important;">
+                    Yes, Deactivate Student
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CertHub - Institutional Digital Credential & Verification Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-glow: rgba(37, 99, 235, 0.25);
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748b;
+            --slate-200: #e2e8f0;
+            --slate-100: #f1f5f9;
+            --slate-50: #f8fafc;
+            --emerald-600: #059669;
+            --emerald-50: #ecfdf5;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--slate-50);
+            color: var(--slate-800);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Glassmorphic Navbar */
+        .landing-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--slate-200);
+            padding: 0.85rem 1.5rem;
+            transition: all 0.2s ease;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--slate-900);
+            letter-spacing: -0.3px;
+        }
+        .brand-icon {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .nav-link {
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--slate-600);
+            transition: color 0.15s ease;
+        }
+        .nav-link:hover {
+            color: var(--primary);
+        }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .user-pill {
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--slate-100);
+            border: 1px solid var(--slate-200);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            color: var(--slate-700);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-auth-panel {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 16px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px var(--primary-glow);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-auth-panel:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            box-shadow: 0 4px 14px var(--primary-glow);
+            transform: translateY(-1px);
+        }
+        .btn-logout {
+            font-size: 12.5px;
+            color: var(--slate-500);
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+        .btn-logout:hover {
+            color: #dc2626;
+            background: #fef2f2;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            padding: 4.5rem 1.5rem 3.5rem 1.5rem;
+            text-align: center;
+            position: relative;
+            background: radial-gradient(circle at 50% 10%, rgba(37, 99, 235, 0.08) 0%, transparent 60%);
+        }
+        .hero-container {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+        .pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.85rem;
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--slate-700);
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--slate-900);
+            letter-spacing: -1px;
+            line-height: 1.18;
+            margin-bottom: 1.25rem;
+        }
+        .hero-title span {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-subtitle {
+            font-size: 16px;
+            color: var(--slate-600);
+            line-height: 1.6;
+            max-width: 680px;
+            margin: 0 auto 2.25rem auto;
+        }
+        .hero-cta-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.85rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .btn-hero-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            font-size: 14.5px;
+            font-weight: 700;
+            padding: 11px 24px;
+            border-radius: 6px;
+            box-shadow: 0 4px 14px var(--primary-glow);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-hero-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+        .btn-hero-secondary {
+            background: #ffffff;
+            color: var(--slate-800);
+            border: 1px solid var(--slate-200);
+            font-size: 14.5px;
+            font-weight: 600;
+            padding: 11px 22px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-hero-secondary:hover {
+            background: var(--slate-100);
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+
+        /* Fast Verification Widget in Hero */
+        .verification-widget {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 660px;
+            margin: 0 auto;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06), 0 8px 10px -6px rgba(0,0,0,0.04);
+            text-align: left;
+        }
+        .widget-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.85rem;
+        }
+        .widget-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--slate-900);
+        }
+        .widget-form {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .widget-input {
+            flex: 1;
+            font-size: 13.5px;
+            padding: 9px 14px;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .widget-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+        .widget-btn {
+            background: var(--slate-900);
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 9px 18px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            white-space: nowrap;
+        }
+        .widget-btn:hover {
+            background: var(--slate-800);
+        }
+        .widget-hint {
+            font-size: 11px;
+            color: var(--slate-500);
+            margin-top: 0.5rem;
+        }
+
+        /* Section Container */
+        .section-container {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .section-tag {
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--slate-900);
+            letter-spacing: -0.5px;
+        }
+        .section-subtitle {
+            font-size: 14.5px;
+            color: var(--slate-600);
+            max-width: 600px;
+            margin: 0.5rem auto 0 auto;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        .feature-card {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: 10px;
+            padding: 1.75rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .feature-card:hover {
+            transform: translateY(-3px);
+            border-color: #cbd5e1;
+            box-shadow: 0 12px 24px -4px rgba(15,23,42,0.08);
+        }
+        .feature-icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: var(--slate-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1.15rem;
+            color: var(--primary);
+        }
+        .feature-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--slate-900);
+            margin-bottom: 0.4rem;
+        }
+        .feature-desc {
+            font-size: 13px;
+            color: var(--slate-600);
+            line-height: 1.55;
+        }
+
+        /* Authorization Callout Banner */
+        .auth-banner-section {
+            background: linear-gradient(135deg, var(--slate-900), var(--slate-800));
+            color: #ffffff;
+            border-radius: 16px;
+            padding: 3rem 2.5rem;
+            margin: 1rem 1.5rem 4rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.4);
+        }
+        .auth-banner-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        .auth-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #93c5fd;
+            margin-bottom: 1.25rem;
+        }
+        .auth-banner-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.85rem;
+            line-height: 1.2;
+        }
+        .auth-banner-desc {
+            font-size: 14.5px;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            max-width: 620px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn-panel-action {
+            background: #ffffff;
+            color: var(--slate-900);
+            font-size: 15px;
+            font-weight: 700;
+            padding: 12px 28px;
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-panel-action:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        /* Footer */
+        .landing-footer {
+            background: #ffffff;
+            border-top: 1px solid var(--slate-200);
+            padding: 2.5rem 1.5rem;
+            font-size: 13px;
+            color: var(--slate-500);
+        }
+        .footer-container {
+            max-width: 1160px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .footer-links {
+            display: flex;
+            gap: 1.25rem;
+            align-items: center;
+        }
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 900px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .hero-title { font-size: 32px; }
+            .auth-banner-title { font-size: 26px; }
+        }
+        @media (max-width: 640px) {
+            .features-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .widget-form { flex-direction: column; }
+            .hero-title { font-size: 27px; }
+            .auth-banner-section { padding: 2rem 1.25rem; margin: 1rem; }
+            .footer-container { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Standalone Landing Navigation Header -->
+    <nav class="landing-navbar">
+        <div class="nav-container">
+            <a href="{% url 'home' %}" class="nav-brand">
+                <div class="brand-icon">🎓</div>
+                <span>CertHub</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="{% url 'verify:verify_search' %}" class="nav-link">Public Verifier</a>
+                <a href="#authorization" class="nav-link">Institutional Access</a>
+            </div>
+
+            <div class="nav-actions">
+                {% if user.is_authenticated %}
+                    <span class="user-pill">
+                        <span>●</span>
+                        <span>{{ user.first_name|default:user.username }}</span>
+                    </span>
+                    <a href="{% url 'dashboard' %}" class="btn-auth-panel">
+                        Main Panel &rarr;
+                    </a>
+                    <a href="{% url 'logout' %}" class="btn-logout" title="Sign Out">
+                        Sign Out
+                    </a>
+                {% else %}
+                    <a href="{% url 'verify:verify_search' %}" class="nav-link" style="margin-right: 0.5rem;">
+                        Verify
+                    </a>
+                    <a href="{% url 'login' %}" class="btn-auth-panel">
+                        Authorize / Sign In &rarr;
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Hero Section -->
+    <header class="hero-section">
+        <div class="hero-container">
+            <div class="pill-badge">
+                <span>🛡️</span>
+                <span>Cryptographically Verifiable Credential Infrastructure</span>
+            </div>
+
+            <h1 class="hero-title">
+                Issue, Manage &amp; Verify<br>
+                <span>Tamper-Proof Certificates</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                Enterprise digital credentialing for universities, academies, and institutes. Generate vector-precise PDFs, embed dynamic QR verification codes, and manage issuance across an immutable ledger.
+            </p>
+
+            <!-- Hero Action Buttons with Direct Link of Authorization to the Main Panel -->
+            <div class="hero-cta-group">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn-hero-primary">
+                        <span>🚀</span> Launch Main Panel &rarr;
+                    </a>
+                    <a href="{% url 'dashboard:certificate_create' %}" class="btn-hero-secondary">
+                        <span>+</span> Issue Certificate
+                    </a>
+                    <a href="{% url 'verify:verify_search' %}" class="btn-hero-secondary">
+                        <span>🔍</span> Public Verifier
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-hero-primary">
+                        <span>🔐</span> Authorize &amp; Sign In to Main Panel &rarr;
+                    </a>
+                    <a href="{% url 'verify:verify_search' %}" class="btn-hero-secondary">
+                        <span>🔍</span> Public Certificate Verifier
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Instant Public Lookup Widget directly on Hero -->
+            <div class="verification-widget">
+                <div class="widget-header">
+                    <span style="font-size: 16px;">⚡</span>
+                    <span class="widget-title">Quick Public Certificate Lookup</span>
+                </div>
+                <form action="{% url 'verify:verify_search' %}" method="post" class="widget-form">
+                    {% csrf_token %}
+                    <input 
+                        type="text" 
+                        name="q" 
+                        class="widget-input" 
+                        placeholder="Enter Certificate ID (e.g. COMP-INT-2026-692060) or Token..." 
+                        required
+                    />
+                    <button type="submit" class="widget-btn">
+                        Verify Instantly
+                    </button>
+                </form>
+                <div class="widget-hint">
+                    No login required. Public verifiers and employers can validate authentic documents in real time.
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Core Features Section -->
+    <section class="section-container" id="features">
+        <div class="section-header">
+            <span class="section-tag">Institutional Capabilities</span>
+            <h2 class="section-title">Engineered for Academic Trust &amp; Speed</h2>
+            <p class="section-subtitle">A unified platform to automate certificate issuance, verify authenticity, and preserve historical records with zero friction.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon-box">⚡</div>
+                <h3 class="feature-title">Instant QR Verification</h3>
+                <p class="feature-desc">Every issued certificate embeds a unique cryptographic token and QR anchor for 1-second public lookup without exposing personal data.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon-box">📜</div>
+                <h3 class="feature-title">Precision PDF Engine</h3>
+                <p class="feature-desc">Vector A4 landscape generation with ornate borders, gold seals, official signatories, and crystal-clear print resolution.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon-box">🎨</div>
+                <h3 class="feature-title">Designer Templates</h3>
+                <p class="feature-desc">Switch seamlessly between Classic Ornate, Modern Minimalist, and Professional Executive templates crafted for institutional prestige.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon-box">📁</div>
+                <h3 class="feature-title">Batch CSV Issuance</h3>
+                <p class="feature-desc">Upload graduating cohorts via structured CSV. Pre-validate records, inspect live draft previews, and batch-issue with a single click.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon-box">🔒</div>
+                <h3 class="feature-title">Immutable Audit Trail</h3>
+                <p class="feature-desc">Complete cryptographic event tracking for every issuance, email dispatch, verification attempt, and administrative revocation.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon-box">✉️</div>
+                <h3 class="feature-title">Automated Student Delivery</h3>
+                <p class="feature-desc">Direct email dispatch to recipients with personalized messages, secure download attachments, and permanent verification links.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dedicated Authorization to Main Panel Section -->
+    <section class="auth-banner-section" id="authorization">
+        <div class="auth-banner-content">
+            <div class="auth-badge">
+                <span>🔐</span>
+                <span>Restricted Institutional Access</span>
+            </div>
+            <h2 class="auth-banner-title">
+                Institutional Staff &amp; Administrator Portal
+            </h2>
+            <p class="auth-banner-desc">
+                Authorized academic officers, directors, and credential administrators can log in to access the central management panel to create programs, manage students, configure authorized signatories, and issue certificates.
+            </p>
+            <div>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn-panel-action">
+                        <span>🚀</span> Open Central Management Panel &rarr;
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-panel-action">
+                        <span>🔐</span> Authorize &amp; Sign In to Main Panel &rarr;
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Landing Footer -->
+    <footer class="landing-footer">
+        <div class="footer-container">
+            <div>
+                <strong>CertHub Platform</strong> &middot; Authoritative Digital Credentialing Engine &copy; 2026
+            </div>
+            <div class="footer-links">
+                <a href="{% url 'verify:verify_search' %}">Public Verification</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}">Main Panel</a>
+                    <a href="{% url 'logout' %}">Sign Out</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Issuer Sign In</a>
+                {% endif %}
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

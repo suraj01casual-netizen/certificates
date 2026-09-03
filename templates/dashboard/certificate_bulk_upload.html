@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Issue Certificates via CSV - CertHub{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="navigation-link">
+        <a href="{% url 'dashboard:certificate_list' %}" class="back-link">&larr; Back to Certificate Directory</a>
+    </div>
+
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="title-area">
+            <h1>Bulk Issue Certificates via CSV</h1>
+            <p class="subtitle">Upload a CSV spreadsheet to validate, preview, and generate certificates in batches.</p>
+        </div>
+        <div class="action-area">
+            <a href="{% url 'dashboard:certificate_bulk_sample_csv' %}" class="btn btn-secondary btn-sm">
+                📥 Sample CSV Template
+            </a>
+        </div>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="form-card">
+        <form method="post" action="{% url 'dashboard:certificate_bulk_validate' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-field" style="margin-bottom: 1.25rem;">
+                <label class="form-label">
+                    Upload CSV Spreadsheet *
+                </label>
+                <div style="border: 2px dashed #d1d5db; border-radius: 4px; padding: 1.5rem; text-align: center; background: #f9fafb;">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">📊</div>
+                    <div style="font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 0.2rem;">
+                        Select a CSV file to validate
+                    </div>
+                    <div style="font-size: 11.5px; color: #6b7280; margin-bottom: 0.75rem;">
+                        UTF-8 encoded CSV file (Max 10 MB)
+                    </div>
+                    <input type="file" name="csv_file" id="id_csv_file" accept=".csv" required style="font-size: 12px;" />
+                </div>
+                {% if form.csv_file.errors %}
+                    <div class="field-errors">
+                        {{ form.csv_file.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Optional Defaults Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; background: #f9fafb; padding: 0.85rem 1rem; border-radius: 4px; border: 1px solid #e5e7eb;">
+                <div class="form-field" style="margin-bottom: 0;">
+                    <label class="form-label">Default Template</label>
+                    {{ form.default_template }}
+                    <small style="color: #6b7280; font-size: 11px;">Fallback if omitted from a row.</small>
+                </div>
+                <div class="form-field" style="margin-bottom: 0;">
+                    <label class="form-label">Default Signatory</label>
+                    {{ form.default_signatory }}
+                    <small style="color: #6b7280; font-size: 11px;">Fallback if omitted from a row.</small>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'dashboard:certificate_list' %}" class="btn btn-secondary btn-sm">Cancel</a>
+                <button type="submit" class="btn btn-primary btn-sm">🔍 Validate &amp; Preview &rarr;</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- CSV Format Specification Card -->
+    <div class="card" style="margin-top: 1rem;">
+        <div class="card-header">
+            <h2>CSV Column Reference</h2>
+        </div>
+        <p style="font-size: 12px; color: #6b7280; margin-bottom: 0.75rem;">
+            Headers are case-insensitive. Ensure each row contains at least the required fields:
+        </p>
+
+        <div class="table-responsive">
+            <table class="student-table">
+                <thead>
+                    <tr>
+                        <th>Header / Aliases</th>
+                        <th>Required?</th>
+                        <th>Sample Value</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>student_name</code>, <code>name</code></td>
+                        <td><span class="badge badge-danger">Required</span></td>
+                        <td>Alex Morgan</td>
+                        <td>Full recipient legal name</td>
+                    </tr>
+                    <tr>
+                        <td><code>student_email</code>, <code>email</code></td>
+                        <td><span class="badge badge-danger">Required</span></td>
+                        <td>alex.m@example.com</td>
+                        <td>Recipient contact email</td>
+                    </tr>
+                    <tr>
+                        <td><code>program_name</code>, <code>program</code></td>
+                        <td><span class="badge badge-danger">Required</span></td>
+                        <td>Full-Stack Engineering</td>
+                        <td>Matches registered program</td>
+                    </tr>
+                    <tr>
+                        <td><code>issue_date</code>, <code>date</code></td>
+                        <td><span class="badge badge-secondary">Optional</span></td>
+                        <td>2026-09-01</td>
+                        <td>Defaults to today (YYYY-MM-DD)</td>
+                    </tr>
+                    <tr>
+                        <td><code>certificate_type</code></td>
+                        <td><span class="badge badge-secondary">Optional</span></td>
+                        <td>COMPLETION</td>
+                        <td>COMPLETION, MERIT, INTERNSHIP</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Company Settings - Dashboard{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+
+    <!-- Header -->
+    <div class="header-section">
+        <div class="title-area">
+            <h1>Company &amp; Issuing Authority Settings</h1>
+            <p class="subtitle">Configure branding, contact details, and certificate footer for all issued credentials.</p>
+        </div>
+        <div class="action-area">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div style="display: grid; grid-template-columns: 1fr 420px; gap: 1.25rem; align-items: start;">
+
+        <!-- LEFT: Settings Form -->
+        <div>
+            <form method="post" enctype="multipart/form-data" id="companySettingsForm">
+                {% csrf_token %}
+
+                <!-- Section 1: Branding -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">
+                        <h2>Organization Branding</h2>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-field">
+                        <label class="form-label" for="id_company_name">Company / Organization Name *</label>
+                        {{ form.company_name }}
+                        {% if form.company_name.errors %}
+                            <div class="field-errors">{{ form.company_name.errors.0 }}</div>
+                        {% endif %}
+                        <small style="font-size: 11px; color: #6b7280;">Displayed on all certificates, verification pages, and public portal.</small>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="id_logo">Company Logo (JPG, PNG, WebP, SVG &ndash; Max 2MB)</label>
+
+                        <!-- Logo Preview + Upload side-by-side -->
+                        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                            <div id="logoPreviewBox" style="width: 56px; height: 56px; flex-shrink: 0; border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                {% if company.logo %}
+                                    <img src="{{ company.logo.url }}" alt="Logo" id="logoPreviewImg" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                                {% else %}
+                                    <span id="logoPlaceholderText" style="font-size: 1.4rem;">🏢</span>
+                                    <img src="" alt="Preview" id="logoPreviewImg" style="display: none; max-width: 100%; max-height: 100%; object-fit: contain;" />
+                                {% endif %}
+                            </div>
+                            <div style="flex: 1;">
+                                {{ form.logo }}
+                                {% if form.logo.errors %}
+                                    <div class="field-errors">{{ form.logo.errors.0 }}</div>
+                                {% endif %}
+                                <div id="logoFileError" class="field-errors" style="display: none;"></div>
+                                <small style="font-size: 11px; color: #6b7280;">Embedded in certificate PDFs. Transparent PNG recommended.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="id_theme_color">Brand Theme Color</label>
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                            {{ form.theme_color }}
+                            <span id="themeColorHex" style="font-family: monospace; font-size: 12.5px; font-weight: 600; color: #111827;">
+                                {{ company.theme_color|default:"#2c3e50" }}
+                            </span>
+                        </div>
+                        <small style="font-size: 11px; color: #6b7280;">Used as the accent/border color on certificates and verification pages.</small>
+                    </div>
+                </div>
+
+                <!-- Section 2: Contact Details -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">
+                        <h2>Contact &amp; Public Information</h2>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label" for="id_email">Contact Email</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="field-errors">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="id_phone">Contact Phone</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <div class="field-errors">{{ form.phone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="id_website">Official Website URL</label>
+                            {{ form.website }}
+                            {% if form.website.errors %}
+                                <div class="field-errors">{{ form.website.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="id_address">Physical / Campus Address</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <div class="field-errors">{{ form.address.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="id_description">Organization Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="field-errors">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                        <small style="font-size: 11px; color: #6b7280;">Brief mission statement or institutional description.</small>
+                    </div>
+                </div>
+
+                <!-- Section 3: Certificate Footer -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">
+                        <h2>Certificate Footer Notice</h2>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="id_certificate_footer">Official Disclaimer / Footer Text</label>
+                        {{ form.certificate_footer }}
+                        {% if form.certificate_footer.errors %}
+                            <div class="field-errors">{{ form.certificate_footer.errors.0 }}</div>
+                        {% endif %}
+                        <small style="font-size: 11px; color: #6b7280;">Printed at the bottom of every generated certificate PDF.</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm">Cancel</a>
+                        <button type="submit" class="btn btn-primary btn-sm" id="saveSettingsBtn">
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- RIGHT: Live Certificate Preview Panel -->
+        <div style="position: sticky; top: 1rem;">
+            <!-- Brand Identity Card (compact) -->
+            <div class="card" style="margin-bottom: 1rem;">
+                <div class="card-header">
+                    <h2>Brand Preview</h2>
+                    <span style="font-size: 10px; color: #9ca3af; background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 2px; font-weight: 600;">LIVE</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div id="previewLogoBox" style="width: 44px; height: 44px; flex-shrink: 0; border: 1px solid #e5e7eb; border-radius: 3px; background: #f9fafb; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        {% if company.logo %}
+                            <img src="{{ company.logo.url }}" alt="Logo" id="previewLogoImg" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                        {% else %}
+                            <span id="previewLogoPlaceholder" style="font-size: 1.2rem;">🏢</span>
+                            <img src="" alt="Logo" id="previewLogoImg" style="display: none; max-width: 100%; max-height: 100%; object-fit: contain;" />
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div id="previewCompanyName" style="font-size: 13.5px; font-weight: 700; color: #111827;">
+                            {{ company.name|default:"Your Organization Name" }}
+                        </div>
+                        <div id="previewWebsite" style="font-size: 11px; color: #6b7280;">
+                            {{ company.website|default:"https://organization.com" }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color accent bar -->
+                <div id="previewColorBar" style="height: 3px; border-radius: 2px; background-color: {{ company.theme_color|default:'#2c3e50' }}; margin-bottom: 0.65rem;"></div>
+
+                <div style="font-size: 11px; color: #4b5563; display: flex; flex-direction: column; gap: 0.2rem;">
+                    <span>✉️ <span id="previewEmail">{{ company.email|default:"contact@organization.com" }}</span></span>
+                    <span>📞 <span id="previewPhone">{{ company.phone|default:"—" }}</span></span>
+                    <span>📍 <span id="previewAddress">{{ company.address|default:"—" }}</span></span>
+                </div>
+            </div>
+
+            <!-- Certificate Mock Preview -->
+            <div class="card" style="margin-bottom: 0;">
+                <div class="card-header">
+                    <h2>Certificate Simulation</h2>
+                    <span style="font-size: 10px; color: #9ca3af; background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 2px; font-weight: 600;">LIVE</span>
+                </div>
+
+                <!-- Certificate mock-up that resembles an actual certificate -->
+                <div id="certMock" style="border: 2px solid {{ company.theme_color|default:'#2c3e50' }}; border-radius: 4px; padding: 1rem; background: #ffffff; font-family: 'Georgia', serif; position: relative;">
+
+                    <!-- Certificate top bar accent -->
+                    <div id="certTopBar" style="height: 4px; background: {{ company.theme_color|default:'#2c3e50' }}; margin: -1rem -1rem 0.75rem -1rem; border-radius: 2px 2px 0 0;"></div>
+
+                    <!-- Header row: logo + org name -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div id="certLogoBox" style="width: 30px; height: 30px; border: 1px solid #e5e7eb; border-radius: 2px; background: #f9fafb; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+                                {% if company.logo %}
+                                    <img src="{{ company.logo.url }}" alt="Logo" id="certLogoImg" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                                {% else %}
+                                    <span id="certLogoPlaceholder" style="font-size: 0.8rem;">🏢</span>
+                                    <img src="" alt="Logo" id="certLogoImg" style="display: none; max-width: 100%; max-height: 100%; object-fit: contain;" />
+                                {% endif %}
+                            </div>
+                            <span id="certCompanyName" style="font-size: 11px; font-weight: 700; color: #111827; font-family: sans-serif; letter-spacing: -0.01em;">
+                                {{ company.name|default:"Your Organization" }}
+                            </span>
+                        </div>
+                        <span style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; font-family: sans-serif;">Certificate</span>
+                    </div>
+
+                    <!-- "This certifies that" -->
+                    <div style="text-align: center; padding: 0.5rem 0 0.65rem 0;">
+                        <div style="font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.1em; color: #9ca3af; font-family: sans-serif; margin-bottom: 0.2rem;">This certifies that</div>
+                        <div style="font-size: 15px; font-weight: 700; color: #111827; font-family: 'Georgia', serif; letter-spacing: -0.01em;">Sample Student Name</div>
+                        <div style="font-size: 8px; color: #6b7280; font-family: sans-serif; margin-top: 0.25rem;">has successfully completed</div>
+                        <div style="font-size: 11px; font-weight: 600; color: #111827; font-family: sans-serif; margin-top: 0.15rem;">Advanced Full-Stack Engineering Program</div>
+                    </div>
+
+                    <!-- Details row -->
+                    <div style="display: flex; justify-content: space-between; font-family: sans-serif; font-size: 8.5px; color: #6b7280; padding: 0.5rem 0; border-top: 1px solid #f3f4f6; border-bottom: 1px solid #f3f4f6; margin-bottom: 0.5rem;">
+                        <div><span style="font-weight: 700; color: #111827;">Duration:</span> 90 Days</div>
+                        <div><span style="font-weight: 700; color: #111827;">Issue Date:</span> Sep 3, 2026</div>
+                        <div><span style="font-weight: 700; color: #111827;">Type:</span> Internship</div>
+                    </div>
+
+                    <!-- Footer: signatory + disclaimer -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div style="font-family: sans-serif; font-size: 8px; color: #6b7280; max-width: 200px; font-style: italic;" id="certFooterText">
+                            {{ company.certificate_footer|default:"This is an officially verified credential issued by the institution." }}
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="width: 80px; border-top: 1px solid #d1d5db; margin-bottom: 2px; margin-left: auto;"></div>
+                            <div style="font-size: 8px; color: #111827; font-family: sans-serif; font-weight: 600;">Authorized Signatory</div>
+                            <div style="font-size: 7px; color: #6b7280; font-family: sans-serif;">Director</div>
+                        </div>
+                    </div>
+
+                    <!-- QR placeholder at bottom right -->
+                    <div style="position: absolute; bottom: 0.5rem; right: 0.5rem; width: 28px; height: 28px; border: 1px solid #e5e7eb; background: #f9fafb; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 0.7rem;">▣</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Helper to get element safely
+    function $id(id) { return document.getElementById(id); }
+
+    // ── Company Name ──────────────────────────────────────────────────
+    var nameInput = $id('id_company_name');
+    if (nameInput) {
+        nameInput.addEventListener('input', function () {
+            var val = this.value.trim() || 'Your Organization Name';
+            if ($id('previewCompanyName')) $id('previewCompanyName').textContent = val;
+            if ($id('certCompanyName')) $id('certCompanyName').textContent = val;
+        });
+    }
+
+    // ── Email ─────────────────────────────────────────────────────────
+    var emailInput = $id('id_email');
+    if (emailInput) {
+        emailInput.addEventListener('input', function () {
+            if ($id('previewEmail')) $id('previewEmail').textContent = this.value.trim() || 'contact@organization.com';
+        });
+    }
+
+    // ── Phone ─────────────────────────────────────────────────────────
+    var phoneInput = $id('id_phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function () {
+            if ($id('previewPhone')) $id('previewPhone').textContent = this.value.trim() || '—';
+        });
+    }
+
+    // ── Website ───────────────────────────────────────────────────────
+    var websiteInput = $id('id_website');
+    if (websiteInput) {
+        websiteInput.addEventListener('input', function () {
+            if ($id('previewWebsite')) $id('previewWebsite').textContent = this.value.trim() || 'https://organization.com';
+        });
+    }
+
+    // ── Address ───────────────────────────────────────────────────────
+    var addressInput = $id('id_address');
+    if (addressInput) {
+        addressInput.addEventListener('input', function () {
+            if ($id('previewAddress')) $id('previewAddress').textContent = this.value.trim() || '—';
+        });
+    }
+
+    // ── Certificate Footer ────────────────────────────────────────────
+    var footerInput = $id('id_certificate_footer');
+    if (footerInput) {
+        footerInput.addEventListener('input', function () {
+            var val = this.value.trim() || 'This is an officially verified credential issued by the institution.';
+            if ($id('certFooterText')) $id('certFooterText').textContent = val;
+        });
+    }
+
+    // ── Theme Color ───────────────────────────────────────────────────
+    var colorInput = $id('id_theme_color');
+    if (colorInput) {
+        colorInput.addEventListener('input', function () {
+            var col = this.value;
+            if ($id('themeColorHex')) $id('themeColorHex').textContent = col;
+            if ($id('previewColorBar')) $id('previewColorBar').style.backgroundColor = col;
+            if ($id('certMock')) {
+                $id('certMock').style.borderColor = col;
+            }
+            if ($id('certTopBar')) $id('certTopBar').style.background = col;
+        });
+    }
+
+    // ── Logo Upload Preview ───────────────────────────────────────────
+    var logoInput = $id('id_logo');
+    if (logoInput) {
+        logoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            var errDiv = $id('logoFileError');
+            if (errDiv) errDiv.style.display = 'none';
+
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                if (errDiv) {
+                    errDiv.textContent = 'File exceeds 2MB limit. Please choose a smaller image.';
+                    errDiv.style.display = 'block';
+                }
+                logoInput.value = '';
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function (evt) {
+                var src = evt.target.result;
+
+                // Update main form preview
+                var img = $id('logoPreviewImg');
+                var ph = $id('logoPlaceholderText');
+                if (img) { img.src = src; img.style.display = 'block'; }
+                if (ph) ph.style.display = 'none';
+
+                // Update brand card preview
+                var previewImg = $id('previewLogoImg');
+                var previewPh = $id('previewLogoPlaceholder');
+                if (previewImg) { previewImg.src = src; previewImg.style.display = 'block'; }
+                if (previewPh) previewPh.style.display = 'none';
+
+                // Update certificate mock preview
+                var certImg = $id('certLogoImg');
+                var certPh = $id('certLogoPlaceholder');
+                if (certImg) { certImg.src = src; certImg.style.display = 'block'; }
+                if (certPh) certPh.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // ── Mobile responsive grid collapse ──────────────────────────────
+    function checkWidth() {
+        var grid = document.querySelector('[data-settings-grid]');
+        if (!grid) return;
+        if (window.innerWidth < 900) {
+            grid.style.gridTemplateColumns = '1fr';
+        } else {
+            grid.style.gridTemplateColumns = '1fr 420px';
+        }
+    }
+    window.addEventListener('resize', checkWidth);
+});
+</script>
+
+<style>
+@media (max-width: 900px) {
+    .student-management-container > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+{% endblock %}

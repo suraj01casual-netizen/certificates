@@ -1,0 +1,26 @@
+# Nixpacks configuration for Railway deployment with WeasyPrint & Django support
+
+[phases.setup]
+nixPkgs = [
+    "python311",
+    "pango",
+    "harfbuzz",
+    "glib",
+    "fontconfig",
+    "ghostscript",
+    "postgresql"
+]
+
+[phases.install]
+cmds = [
+    "pip install --upgrade pip",
+    "pip install -r requirements.txt"
+]
+
+[phases.build]
+cmds = [
+    "python manage.py collectstatic --noinput"
+]
+
+[start]
+cmd = "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT"

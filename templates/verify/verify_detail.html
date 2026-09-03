@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% if is_found and is_valid %}
+            Credential Verification - {{ certificate.student.full_name }}
+        {% elif is_found %}
+            Certificate Status: {{ status_title }}
+        {% else %}
+            Certificate Record Not Found
+        {% endif %}
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+            padding: 2rem 1rem 3rem 1rem;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        .verify-wrapper {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+        /* Header / Issuing Authority Branding */
+        .authority-header {
+            text-align: center;
+            margin-bottom: 1.75rem;
+        }
+        .authority-logo {
+            max-height: 52px;
+            max-width: 220px;
+            object-fit: contain;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+        .authority-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.3px;
+        }
+        .authority-subtitle {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #64748b;
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+        /* Status Banners */
+        .status-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .status-card.verified {
+            border: 1px solid #10b981;
+            border-left: 4px solid #10b981;
+        }
+        .status-card.revoked {
+            border: 1px solid #ef4444;
+            border-left: 4px solid #ef4444;
+        }
+        .status-card.not-found {
+            border: 1px solid #f59e0b;
+            border-left: 4px solid #f59e0b;
+        }
+        .status-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .status-card.verified .status-icon { background: #ecfdf5; color: #059669; }
+        .status-card.revoked .status-icon { background: #fef2f2; color: #dc2626; }
+        .status-card.not-found .status-icon { background: #fffbeb; color: #d97706; }
+        .status-title {
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .status-card.verified .status-title { color: #065f46; }
+        .status-card.revoked .status-title { color: #991b1b; }
+        .status-card.not-found .status-title { color: #92400e; }
+        .status-desc {
+            font-size: 12px;
+            color: #475569;
+            margin-top: 0.15rem;
+            line-height: 1.4;
+        }
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .cert-id-badge {
+            font-family: monospace;
+            font-size: 12.5px;
+            font-weight: 600;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: #0f172a;
+        }
+        .state-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .state-badge.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .state-badge.danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            border: none;
+        }
+        .btn-download {
+            background: #0f172a;
+            color: #ffffff;
+        }
+        .btn-download:hover {
+            background: #1e293b;
+        }
+        .btn-copy {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+        }
+        .btn-copy:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+        /* Main Information Card */
+        .credential-card {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            padding: 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .type-badge {
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.4px;
+        }
+        /* Recipient Presentation Block */
+        .recipient-block {
+            text-align: center;
+            padding: 1.75rem 0 1.5rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .recipient-intro {
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .recipient-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0.35rem 0 0.3rem 0;
+            letter-spacing: -0.5px;
+        }
+        .candidate-id-tag {
+            font-size: 11.5px;
+            color: #64748b;
+            font-family: monospace;
+            background: #f8fafc;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 0.75rem;
+        }
+        .program-narrative {
+            font-size: 13.5px;
+            color: #334155;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.55;
+        }
+        .program-narrative strong {
+            color: #0f172a;
+        }
+        /* Key-Value Details Grid */
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .meta-label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+        .meta-value {
+            font-size: 13.5px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+        /* Verification Proof & Signatory Block */
+        .proof-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .qr-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .qr-img {
+            width: 72px;
+            height: 72px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 2px;
+            flex-shrink: 0;
+        }
+        .token-details {
+            max-width: 320px;
+        }
+        .token-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .token-value {
+            font-family: monospace;
+            font-size: 11px;
+            color: #0f172a;
+            word-break: break-all;
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+        .signatory-section {
+            text-align: right;
+            margin-left: auto;
+        }
+        .signature-img {
+            max-height: 42px;
+            max-width: 130px;
+            object-fit: contain;
+            margin-bottom: 4px;
+            display: block;
+            margin-left: auto;
+        }
+        .signatory-line {
+            border-top: 1.5px solid #cbd5e1;
+            width: 140px;
+            margin-left: auto;
+            padding-top: 4px;
+        }
+        .signatory-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0f172a;
+            display: block;
+        }
+        .signatory-title {
+            font-size: 10.5px;
+            color: #64748b;
+            display: block;
+        }
+        /* Footer note */
+        .verify-footer {
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 1.75rem;
+            line-height: 1.4;
+        }
+        @media (max-width: 600px) {
+            .metadata-grid { grid-template-columns: 1fr; gap: 0.85rem; }
+            .proof-block { flex-direction: column; align-items: flex-start; }
+            .signatory-section { text-align: left; margin-left: 0; }
+            .signatory-line { margin-left: 0; }
+            .signature-img { margin-left: 0; }
+            .recipient-name { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="verify-wrapper">
+
+    <!-- Issuing Authority Branding -->
+    <header class="authority-header">
+        {% if company_settings and company_settings.logo %}
+            <img src="{{ company_settings.logo.url }}" alt="{{ company_name }}" class="authority-logo">
+        {% endif %}
+        <h2 class="authority-name">{{ company_name }}</h2>
+        <p class="authority-subtitle">Official Credential Verification Record</p>
+    </header>
+
+    <!-- Verification Status Banner -->
+    <section class="status-card {% if status_type == 'VERIFIED' %}verified{% elif status_type == 'REVOKED' %}revoked{% else %}not-found{% endif %}">
+        <div class="status-icon">
+            {% if status_type == 'VERIFIED' %}✓{% elif status_type == 'REVOKED' %}✕{% elif status_type == 'EXPIRED' %}⏳{% else %}!{% endif %}
+        </div>
+        <div style="flex: 1;">
+            <div class="status-title">
+                {% if status_type == 'VERIFIED' %}
+                    VERIFIED CERTIFICATE
+                {% elif status_type == 'REVOKED' %}
+                    CERTIFICATE REVOKED
+                {% elif status_type == 'EXPIRED' %}
+                    CERTIFICATE EXPIRED
+                {% else %}
+                    CERTIFICATE NOT FOUND
+                {% endif %}
+            </div>
+            <p class="status-desc">
+                {% if status_type == 'VERIFIED' %}
+                    Cryptographically validated. Issued by <strong>{{ company_name }}</strong> under registered institutional authority.
+                {% elif status_type == 'REVOKED' %}
+                    Certificate Revoked: This credential was officially revoked by the issuing authority and is no longer valid.
+                {% elif status_type == 'EXPIRED' %}
+                    Certificate Expired: The validity period for this credential has concluded.
+                {% else %}
+                    No certificate record matches this token or identifier. Please confirm the document details.
+                {% endif %}
+            </p>
+        </div>
+    </section>
+
+    {% if is_found %}
+        <!-- Quick Action Bar -->
+        <div class="action-bar">
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span class="cert-id-badge">{{ certificate.certificate_id }}</span>
+                {% if status_type == 'VERIFIED' %}
+                    <span class="state-badge success">Officially Issued</span>
+                {% elif status_type == 'REVOKED' %}
+                    <span class="state-badge danger">Revoked</span>
+                {% else %}
+                    <span class="state-badge">{{ certificate.get_status_display }}</span>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                {% if status_type == 'VERIFIED' %}
+                    <a href="{% url 'verify:verify_download' token %}" class="btn btn-download" target="_blank">
+                        📥 Download Official PDF
+                    </a>
+                {% endif %}
+                <button type="button" class="btn btn-copy" id="copyLinkBtn" onclick="copyVerificationLink()">
+                    🔗 Copy Verification Link
+                </button>
+                <button type="button" class="btn btn-copy" id="shareBtn" onclick="shareCertificate()">
+                    ↗ Share
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Credential Card (Candidate Information & Program Details) -->
+        <main class="credential-card">
+            <div class="card-header-row">
+                <div>
+                    <span style="font-size: 10px; text-transform: uppercase; font-weight: 600; color: #94a3b8; letter-spacing: 0.5px;">Issuing Authority</span>
+                    <div style="font-size: 13.5px; font-weight: 700; color: #0f172a;">{{ company_name }}</div>
+                </div>
+                <span class="type-badge">{{ certificate.get_certificate_type_display }}</span>
+            </div>
+
+            <!-- Recipient Candidate Information -->
+            <div class="recipient-block">
+                <span class="recipient-intro">This certifies that</span>
+                <h1 class="recipient-name">{{ certificate.student.full_name }}</h1>
+                {% if certificate.student.student_id %}
+                    <div class="candidate-id-tag">Candidate ID: {{ certificate.student.student_id }}</div>
+                {% endif %}
+                <p class="program-narrative">
+                    has successfully completed the program <strong>{{ certificate.program.name }}</strong>
+                    {% if certificate.student.branch %}
+                        within the {{ certificate.student.branch }} division
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Structured Metadata Grid -->
+            <div class="metadata-grid">
+                <div class="meta-item">
+                    <span class="meta-label">Issue Date</span>
+                    <span class="meta-value">{{ certificate.issue_date|date:"F d, Y" }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Total Duration</span>
+                    <span class="meta-value">{{ certificate.duration }} Days</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Program Period</span>
+                    <span class="meta-value">
+                        {{ certificate.start_date|date:"F d, Y" }} &ndash; {% if certificate.end_date %}{{ certificate.end_date|date:"F d, Y" }}{% else %}Present{% endif %}
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Signatory Authority</span>
+                    <span class="meta-value">{{ certificate.authorized_signatory.name|default:"Institutional Authority" }}</span>
+                </div>
+            </div>
+
+            {% if skills %}
+                <div style="padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
+                    <span style="font-size: 10.5px; text-transform: uppercase; font-weight: 600; color: #64748b; letter-spacing: 0.6px; display: block; margin-bottom: 0.4rem;">Key Competencies &amp; Skills</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                        {% for skill in skills %}
+                            <span style="font-size: 11.5px; background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; padding: 3px 8px; border-radius: 4px; font-weight: 500;">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if learning_outcomes %}
+                <div style="padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
+                    <span style="font-size: 10.5px; text-transform: uppercase; font-weight: 600; color: #64748b; letter-spacing: 0.6px; display: block; margin-bottom: 0.4rem;">Learning Outcomes</span>
+                    <ul style="padding-left: 1.25rem; font-size: 12px; color: #334155; line-height: 1.6;">
+                        {% for outcome in learning_outcomes %}
+                            <li>{{ outcome }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- Verification Proof & Signatory Block -->
+            <div class="proof-block">
+                <!-- QR Code & Token -->
+                <div class="qr-section">
+                    {% if certificate.qr_code %}
+                        <img src="{{ certificate.qr_code.url }}" alt="Cryptographic QR" class="qr-img">
+                    {% endif %}
+                    <div class="token-details">
+                        <span class="token-label">Verification Token</span>
+                        <div class="token-value">{{ certificate.verification_token }}</div>
+                    </div>
+                </div>
+
+                <!-- Signatory Endorsement -->
+                <div class="signatory-section">
+                    {% if certificate.authorized_signatory and certificate.authorized_signatory.signature_image %}
+                        <img src="{{ certificate.authorized_signatory.signature_image.url }}" alt="Signature" class="signature-img">
+                    {% endif %}
+                    <div class="signatory-line">
+                        <span class="signatory-name">{{ certificate.authorized_signatory.name|default:"Authorized Signature" }}</span>
+                        <span class="signatory-title">{{ certificate.authorized_signatory.title|default:"Executive Director" }}</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    {% else %}
+        <!-- Not Found View -->
+        <main class="credential-card" style="text-align: center; padding: 2.5rem 1.5rem;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</div>
+            <h2 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 0.35rem;">No Matching Record</h2>
+            <p style="font-size: 12.5px; color: #64748b; max-width: 480px; margin: 0 auto;">
+                The identifier or verification token you accessed does not correspond to any valid issued credential in our records.
+            </p>
+        </main>
+    {% endif %}
+
+    <!-- Institutional Footer -->
+    <footer class="verify-footer">
+        Official Verification Record &bull; Digitally Signed &bull; {{ company_name }}
+    </footer>
+
+</div>
+
+<script>
+function copyVerificationLink() {
+    var url = window.location.href;
+    var btn = document.getElementById('copyLinkBtn');
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function() {
+            if (btn) {
+                var old = btn.innerHTML;
+                btn.innerHTML = '✓ Copied!';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = '#059669';
+                setTimeout(function() {
+                    btn.innerHTML = old;
+                    btn.style.borderColor = '#cbd5e1';
+                    btn.style.color = '#334155';
+                }, 2000);
+            }
+        });
+    } else {
+        alert('Verification URL: ' + url);
+    }
+}
+
+function shareCertificate() {
+    var url = window.location.href;
+    if (navigator.share) {
+        navigator.share({
+            title: document.title,
+            text: 'Official Certificate Verification',
+            url: url
+        }).catch(function(){});
+    } else {
+        copyVerificationLink();
+    }
+}
+</script>
+
+</body>
+</html>

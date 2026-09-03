@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Issue Certificate - Step 1{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+
+    <div class="header-section">
+        <div class="title-area">
+            <h1>Issue Certificate</h1>
+            <p class="subtitle">Step 1 of 2 — Configure recipient, program, template and timeline. You will preview before final issuance.</p>
+        </div>
+        <div class="action-area">
+            <a href="{% url 'dashboard:certificate_list' %}" class="btn btn-secondary btn-sm">&larr; Back to Certificates</a>
+        </div>
+    </div>
+
+    <!-- Two-column layout: Form LEFT | Template Preview RIGHT -->
+    <div style="display: grid; grid-template-columns: 1fr 480px; gap: 1.25rem; align-items: start;">
+
+        <!-- LEFT: The Form -->
+        <div>
+            <form method="post" id="certCreateForm">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Section: Recipient & Program -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header"><h2>Recipient &amp; Program</h2></div>
+
+                    <div class="form-field">
+                        <label for="{{ form.student.id_for_label }}" class="form-label">Student *</label>
+                        {{ form.student }}
+                        {% if form.student.errors %}<div class="field-errors">{{ form.student.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.program.id_for_label }}" class="form-label">Program *</label>
+                        {{ form.program }}
+                        {% if form.program.errors %}<div class="field-errors">{{ form.program.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.enrollment.id_for_label }}" class="form-label">Associated Enrollment <small style="color:#9ca3af;">(Optional)</small></label>
+                        {{ form.enrollment }}
+                        {% if form.enrollment.errors %}<div class="field-errors">{{ form.enrollment.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Section: Template & Signatory -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header"><h2>Template &amp; Signatory</h2></div>
+
+                    <div class="form-field">
+                        <label for="{{ form.certificate_type.id_for_label }}" class="form-label">Certificate Type *</label>
+                        {{ form.certificate_type }}
+                        {% if form.certificate_type.errors %}<div class="field-errors">{{ form.certificate_type.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label">Certificate Template * — <small style="color:#9ca3af;">Select a design below</small></label>
+                        {{ form.template }}
+                        {% if form.template.errors %}<div class="field-errors">{{ form.template.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.authorized_signatory.id_for_label }}" class="form-label">Authorized Signatory</label>
+                        {{ form.authorized_signatory }}
+                        {% if form.authorized_signatory.errors %}<div class="field-errors">{{ form.authorized_signatory.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Section: Timeline -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header"><h2>Timeline &amp; Issue Details</h2></div>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="{{ form.start_date.id_for_label }}" class="form-label">Start Date *</label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}<div class="field-errors">{{ form.start_date.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-field">
+                            <label for="{{ form.end_date.id_for_label }}" class="form-label">End Date</label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}<div class="field-errors">{{ form.end_date.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-field">
+                            <label for="{{ form.duration.id_for_label }}" class="form-label">Duration (Days)</label>
+                            {{ form.duration }}
+                            {% if form.duration.errors %}<div class="field-errors">{{ form.duration.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-field">
+                            <label for="{{ form.issue_date.id_for_label }}" class="form-label">Issue Date *</label>
+                            {{ form.issue_date }}
+                            {% if form.issue_date.errors %}<div class="field-errors">{{ form.issue_date.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'dashboard:certificate_list' %}" class="btn btn-secondary btn-sm">Cancel</a>
+                        <button type="submit" class="btn btn-primary btn-sm">Proceed to Preview &rarr;</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- RIGHT: Template Visual Selector -->
+        <div style="position: sticky; top: 1rem;">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Certificate Templates</h2>
+                    <span style="font-size: 10px; color: #9ca3af; background: #f3f4f6; padding: 0.1rem 0.4rem; border-radius: 2px; font-weight: 600;">PREVIEW</span>
+                </div>
+
+                <p style="font-size: 11.5px; color: #6b7280; margin-bottom: 0.85rem;">Click a card to select that template. The selection syncs automatically with the dropdown above.</p>
+
+                <!-- Template cards -->
+                <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+
+                    <!-- CLASSIC -->
+                    <div class="tmpl-card" id="tmpl-card-classic" onclick="selectTemplate('classic')" style="border: 1.5px solid #e5e7eb; border-radius: 6px; cursor: pointer; overflow: hidden; transition: all 0.2s ease; background: #ffffff;">
+                        <div style="background: #0f172a; padding: 0.65rem; height: 215px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                            <img src="{% static 'images/templates/template_classic.png' %}" alt="Classic Certificate" style="max-height: 100%; max-width: 100%; object-fit: contain; border-radius: 3px; box-shadow: 0 4px 16px rgba(0,0,0,0.45); transition: transform 0.2s ease;">
+                            <button type="button" class="btn-enlarge" onclick="event.stopPropagation(); openImageModal('{% static "images/templates/template_classic.png" %}', 'Classic Certificate Template')" title="Enlarge Preview">🔍 Fullscreen</button>
+                        </div>
+                        <div style="padding: 0.65rem 0.85rem; display: flex; justify-content: space-between; align-items: center; background: #ffffff;">
+                            <div>
+                                <div style="font-size: 13px; font-weight: 700; color: #111827;">Classic Certificate</div>
+                                <div style="font-size: 11px; color: #6b7280;">Traditional ornate gold-leaf border &amp; verified seal</div>
+                            </div>
+                            <div id="tmpl-badge-classic" class="tmpl-badge" style="display:none; width: 22px; height: 22px; background: #2563eb; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; color: white; flex-shrink: 0; font-weight: bold;">✓</div>
+                        </div>
+                    </div>
+
+                    <!-- MODERN -->
+                    <div class="tmpl-card" id="tmpl-card-modern" onclick="selectTemplate('modern')" style="border: 1.5px solid #e5e7eb; border-radius: 6px; cursor: pointer; overflow: hidden; transition: all 0.2s ease; background: #ffffff;">
+                        <div style="background: #0f172a; padding: 0.65rem; height: 215px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                            <img src="{% static 'images/templates/template_modern.png' %}" alt="Modern Minimalist" style="max-height: 100%; max-width: 100%; object-fit: contain; border-radius: 3px; box-shadow: 0 4px 16px rgba(0,0,0,0.45); transition: transform 0.2s ease;">
+                            <button type="button" class="btn-enlarge" onclick="event.stopPropagation(); openImageModal('{% static "images/templates/template_modern.png" %}', 'Modern Minimalist Template')" title="Enlarge Preview">🔍 Fullscreen</button>
+                        </div>
+                        <div style="padding: 0.65rem 0.85rem; display: flex; justify-content: space-between; align-items: center; background: #ffffff;">
+                            <div>
+                                <div style="font-size: 13px; font-weight: 700; color: #111827;">Modern Minimalist</div>
+                                <div style="font-size: 11px; color: #6b7280;">Contemporary gradient, clean typography &amp; pills</div>
+                            </div>
+                            <div id="tmpl-badge-modern" class="tmpl-badge" style="display:none; width: 22px; height: 22px; background: #2563eb; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; color: white; flex-shrink: 0; font-weight: bold;">✓</div>
+                        </div>
+                    </div>
+
+                    <!-- PROFESSIONAL -->
+                    <div class="tmpl-card" id="tmpl-card-professional" onclick="selectTemplate('professional')" style="border: 1.5px solid #e5e7eb; border-radius: 6px; cursor: pointer; overflow: hidden; transition: all 0.2s ease; background: #ffffff;">
+                        <div style="background: #0f172a; padding: 0.65rem; height: 215px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                            <img src="{% static 'images/templates/template_professional.png' %}" alt="Professional Corporate" style="max-height: 100%; max-width: 100%; object-fit: contain; border-radius: 3px; box-shadow: 0 4px 16px rgba(0,0,0,0.45); transition: transform 0.2s ease;">
+                            <button type="button" class="btn-enlarge" onclick="event.stopPropagation(); openImageModal('{% static "images/templates/template_professional.png" %}', 'Professional Corporate Template')" title="Enlarge Preview">🔍 Fullscreen</button>
+                        </div>
+                        <div style="padding: 0.65rem 0.85rem; display: flex; justify-content: space-between; align-items: center; background: #ffffff;">
+                            <div>
+                                <div style="font-size: 13px; font-weight: 700; color: #111827;">Professional Corporate</div>
+                                <div style="font-size: 11px; color: #6b7280;">Executive dual-border layout, QR &amp; credential grid</div>
+                            </div>
+                            <div id="tmpl-badge-professional" class="tmpl-badge" style="display:none; width: 22px; height: 22px; background: #2563eb; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; color: white; flex-shrink: 0; font-weight: bold;">✓</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Fullscreen Template Preview -->
+<div id="tmplPreviewModal" onclick="closeImageModal(event)" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem; backdrop-filter: blur(4px);">
+    <div style="position: relative; max-width: 1050px; width: 100%; background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation();">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(30,41,59,0.7);">
+            <div id="modalTitle" style="font-size: 14px; font-weight: 600; color: #ffffff;">Template Preview</div>
+            <button type="button" onclick="closeImageModal()" style="background: none; border: none; font-size: 22px; color: #94a3b8; cursor: pointer; line-height: 1; padding: 0 4px;">&times;</button>
+        </div>
+        <div style="padding: 1rem; display: flex; align-items: center; justify-content: center; background: #0f172a;">
+            <img id="modalImg" src="" alt="Full Preview" style="max-height: 78vh; max-width: 100%; object-fit: contain; border-radius: 4px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
+        </div>
+    </div>
+</div>
+
+<style>
+.tmpl-card:hover { border-color: #2563eb !important; box-shadow: 0 4px 14px rgba(37,99,235,0.14) !important; }
+.tmpl-card:hover img { transform: scale(1.02); }
+.tmpl-card.selected { border-color: #2563eb !important; box-shadow: 0 0 0 2px rgba(37,99,235,0.25) !important; }
+.btn-enlarge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(15, 23, 42, 0.85);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(2px);
+}
+.btn-enlarge:hover {
+    opacity: 1;
+    background: #2563eb;
+    border-color: #2563eb;
+    transform: translateY(-1px);
+}
+@media (max-width: 900px) {
+    .student-management-container > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+}
+</style>
+
+<script>
+// Expose functions globally on window to ensure onclick handlers never fail
+function selectTemplate(style) {
+    var templateSelect = document.getElementById('{{ form.template.id_for_label }}');
+    if (!templateSelect) return;
+    
+    var targetMap = {
+        'classic': 'classic certificate',
+        'modern': 'modern minimalist',
+        'professional': 'professional corporate'
+    };
+    var targetKeyword = targetMap[style] || style;
+    var opts = templateSelect.options;
+    var matched = false;
+
+    for (var i = 0; i < opts.length; i++) {
+        var txt = opts[i].text.toLowerCase();
+        if (txt.indexOf(targetKeyword) !== -1) {
+            templateSelect.selectedIndex = i;
+            matched = true;
+            break;
+        }
+    }
+
+    if (matched) {
+        // Dispatch change event to update any listening form state
+        templateSelect.dispatchEvent(new Event('change'));
+    }
+    highlightCard(style);
+}
+window.selectTemplate = selectTemplate;
+
+function highlightCard(style) {
+    ['classic', 'modern', 'professional'].forEach(function(s) {
+        var card = document.getElementById('tmpl-card-' + s);
+        var badge = document.getElementById('tmpl-badge-' + s);
+        if (card) {
+            card.classList.remove('selected');
+            card.style.borderColor = '#e5e7eb';
+            card.style.boxShadow = 'none';
+        }
+        if (badge) badge.style.display = 'none';
+    });
+
+    var activeCard = document.getElementById('tmpl-card-' + style);
+    var activeBadge = document.getElementById('tmpl-badge-' + style);
+    if (activeCard) {
+        activeCard.classList.add('selected');
+        activeCard.style.borderColor = '#2563eb';
+        activeCard.style.boxShadow = '0 0 0 2px rgba(37,99,235,0.25)';
+    }
+    if (activeBadge) {
+        activeBadge.style.display = 'flex';
+    }
+}
+window.highlightCard = highlightCard;
+
+function openImageModal(imgSrc, title) {
+    var modal = document.getElementById('tmplPreviewModal');
+    var modalImg = document.getElementById('modalImg');
+    var modalTitle = document.getElementById('modalTitle');
+    if (modal && modalImg) {
+        modalImg.src = imgSrc;
+        if (modalTitle) modalTitle.textContent = title;
+        modal.style.display = 'flex';
+    }
+}
+window.openImageModal = openImageModal;
+
+function closeImageModal(event) {
+    var modal = document.getElementById('tmplPreviewModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+window.closeImageModal = closeImageModal;
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    var templateSelect = document.getElementById('{{ form.template.id_for_label }}');
+
+    // Attach explicit click listeners on cards in addition to inline onclick
+    ['classic', 'modern', 'professional'].forEach(function(style) {
+        var card = document.getElementById('tmpl-card-' + style);
+        if (card) {
+            card.addEventListener('click', function() {
+                selectTemplate(style);
+            });
+        }
+    });
+
+    // Sync card highlight when dropdown changes
+    if (templateSelect) {
+        templateSelect.addEventListener('change', function () {
+            var txt = (this.options[this.selectedIndex] || {}).text || '';
+            txt = txt.toLowerCase();
+            if (txt.indexOf('classic certificate') !== -1) highlightCard('classic');
+            else if (txt.indexOf('modern minimalist') !== -1) highlightCard('modern');
+            else if (txt.indexOf('professional corporate') !== -1) highlightCard('professional');
+        });
+
+        // Trigger sync on load or check URL query parameter
+        var urlParams = new URLSearchParams(window.location.search);
+        var urlTmpl = urlParams.get('template');
+        if (urlTmpl) {
+            selectTemplate(urlTmpl.toLowerCase());
+        } else {
+            var initial = (templateSelect.options[templateSelect.selectedIndex] || {}).text || '';
+            initial = initial.toLowerCase();
+            if (initial.indexOf('classic certificate') !== -1) highlightCard('classic');
+            else if (initial.indexOf('modern minimalist') !== -1) highlightCard('modern');
+            else if (initial.indexOf('professional corporate') !== -1) highlightCard('professional');
+            else if (templateSelect.options.length > 0) highlightCard('classic');
+        }
+    }
+
+    // Auto-calculate duration when start or end date changes
+    var startDateInput = document.getElementById('{{ form.start_date.id_for_label }}');
+    var endDateInput = document.getElementById('{{ form.end_date.id_for_label }}');
+    var durationInput = document.getElementById('{{ form.duration.id_for_label }}');
+
+    function calculateDuration() {
+        if (!startDateInput || !endDateInput || !durationInput) return;
+        if (startDateInput.value && endDateInput.value) {
+            var s = new Date(startDateInput.value);
+            var e = new Date(endDateInput.value);
+            if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && e >= s) {
+                var days = Math.round((e - s) / (1000 * 60 * 60 * 24));
+                durationInput.value = days;
+            }
+        }
+    }
+
+    if (startDateInput) startDateInput.addEventListener('change', calculateDuration);
+    if (endDateInput) endDateInput.addEventListener('change', calculateDuration);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Certificate Preview — Step 2{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+
+    <div class="header-section">
+        <div class="title-area">
+            <h1>Certificate Live Preview</h1>
+            <p class="subtitle">Step 2 of 2 — Review the certificate layout below. Confirm to generate the ID, QR code and PDF.</p>
+        </div>
+        <div class="action-area" style="display: flex; gap: 0.4rem;">
+            <a href="{% url 'dashboard:certificate_create' %}" class="btn btn-secondary btn-sm">&larr; Edit Details</a>
+            <form method="post" action="{% url 'dashboard:certificate_confirm' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-sm">✓ Confirm &amp; Issue</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Row -->
+    <div class="card" style="margin-bottom: 1rem;">
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Recipient</span>
+                <span class="info-value"><strong>{{ student.full_name }}</strong> &nbsp;<code style="font-size: 10.5px; background: #f3f4f6; padding: 1px 5px; border-radius: 2px; color:#4b5563;">{{ student.student_id }}</code></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Program</span>
+                <span class="info-value">{{ program.name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Type</span>
+                <span class="info-value"><span class="badge badge-info">{{ certificate_type }}</span></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Template</span>
+                <span class="info-value">{{ template.name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Timeline</span>
+                <span class="info-value">{{ start_date|date:"M d, Y" }} &ndash; {% if end_date %}{{ end_date|date:"M d, Y" }}{% else %}Present{% endif %}{% if duration %} &nbsp;({{ duration }} days){% endif %}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Issue Date</span>
+                <span class="info-value">{{ issue_date|date:"M d, Y" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Certificate Preview -->
+    <div class="card" style="margin-bottom: 1rem;">
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+            <div>
+                <h2>A4 Landscape Certificate Preview (297mm &times; 210mm)</h2>
+                <p style="font-size: 11px; color: #6b7280; margin-top: 0.1rem;">Pixel-accurate representation of the generated PDF.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #d1d5db;">
+                    <button type="button" id="zoomBtnSmall" onclick="setPreviewSize(0.48)" style="padding: 2px 8px; font-size: 10.5px; border: none; background: #ffffff; color: #374151; cursor: pointer;">Compact (48%)</button>
+                    <button type="button" id="zoomBtnMedium" onclick="setPreviewSize(0.60)" style="padding: 2px 8px; font-size: 10.5px; border: none; border-left: 1px solid #d1d5db; background: #2563eb; color: #ffffff; font-weight: 600; cursor: pointer;">Default (60%)</button>
+                    <button type="button" id="zoomBtnLarge" onclick="setPreviewSize(0.75)" style="padding: 2px 8px; font-size: 10.5px; border: none; border-left: 1px solid #d1d5db; background: #ffffff; color: #374151; cursor: pointer;">Large (75%)</button>
+                </div>
+                <span style="font-size: 10px; color: #9ca3af; background: #f3f4f6; padding: 0.15rem 0.5rem; border-radius: 2px; font-weight: 600; flex-shrink: 0;">LIVE HTML RENDER</span>
+            </div>
+        </div>
+
+        <!-- Scale wrapper: A4 landscape is 297x210mm = 1122x795px at 96dpi -->
+        <div style="background: #334155; border-radius: 6px; padding: 1rem; overflow: hidden; display: flex; justify-content: center; align-items: flex-start;" id="previewContainerBox">
+            <div style="position: relative; width: 1122px; height: 795px; transform-origin: top center; flex-shrink: 0;" id="previewScaleWrapper">
+                <iframe
+                    id="certPreviewFrame"
+                    style="width: 1122px; height: 795px; border: none; background: #ffffff; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.35); border-radius: 2px;"
+                    frameborder="0"
+                    scrolling="no"
+                ></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+        <a href="{% url 'dashboard:certificate_create' %}" class="btn btn-secondary btn-sm">&larr; Back &amp; Edit</a>
+        <form method="post" action="{% url 'dashboard:certificate_confirm' %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-sm">✓ Confirm &amp; Issue Certificate Now</button>
+        </form>
+    </div>
+</div>
+
+{{ preview_html|json_script:"preview-html-data" }}
+
+<script>
+var currentPreviewScale = 0.60;
+
+function setPreviewSize(targetScale) {
+    currentPreviewScale = targetScale;
+    ['Small', 'Medium', 'Large'].forEach(function(s) {
+        var btn = document.getElementById('zoomBtn' + s);
+        if (btn) {
+            btn.style.background = '#ffffff';
+            btn.style.color = '#374151';
+            btn.style.fontWeight = 'normal';
+        }
+    });
+    var activeId = targetScale <= 0.50 ? 'zoomBtnSmall' : (targetScale <= 0.65 ? 'zoomBtnMedium' : 'zoomBtnLarge');
+    var activeBtn = document.getElementById(activeId);
+    if (activeBtn) {
+        activeBtn.style.background = '#2563eb';
+        activeBtn.style.color = '#ffffff';
+        activeBtn.style.fontWeight = '600';
+    }
+    scalePreview();
+}
+
+function scalePreview() {
+    var wrapper = document.getElementById('previewScaleWrapper');
+    var container = document.getElementById('previewContainerBox');
+    if (!wrapper || !container) return;
+    var containerWidth = container.clientWidth - 40;
+    var fitScale = Math.max(0.1, containerWidth / 1122);
+    var scale = Math.min(currentPreviewScale, fitScale);
+    wrapper.style.transform = 'scale(' + scale + ')';
+    var scaledHeight = Math.round(795 * scale);
+    var heightDiff = 795 - scaledHeight;
+    wrapper.style.marginBottom = '-' + heightDiff + 'px';
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var previewDataEl = document.getElementById('preview-html-data');
+    var frame = document.getElementById('certPreviewFrame');
+    if (previewDataEl && frame) {
+        try {
+            var rawHtml = JSON.parse(previewDataEl.textContent);
+            frame.srcdoc = rawHtml;
+        } catch (e) {
+            console.error("Failed to parse preview HTML:", e);
+        }
+    }
+
+    scalePreview();
+    window.addEventListener('resize', scalePreview);
+});
+</script>
+{% endblock %}

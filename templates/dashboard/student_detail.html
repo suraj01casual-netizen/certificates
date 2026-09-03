@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Student Details - {{ student.full_name }}{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="navigation-link">
+        <a href="{% url 'dashboard:student_list' %}" class="back-link">&larr; Back to Directory</a>
+    </div>
+
+    <div class="detail-card">
+        <!-- Header -->
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                {% if student.profile_photo %}
+                    <img src="{{ student.profile_photo.url }}" alt="{{ student.full_name }}" style="width: 38px; height: 38px; border-radius: 4px; object-fit: cover; border: 1px solid #e5e7eb;">
+                {% else %}
+                    <div style="width: 38px; height: 38px; border-radius: 4px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; color: #111827;">
+                        {{ student.full_name|slice:":2"|upper }}
+                    </div>
+                {% endif %}
+                <div>
+                    <h1 style="font-size: 1.15rem; font-weight: 600; color: #111827; margin: 0;">{{ student.full_name }}</h1>
+                    <div style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.2rem;">
+                        <span class="id-cell"><code>{{ student.student_id }}</code></span>
+                        {% if student.is_active %}
+                            <span class="badge badge-success">Active</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <a href="{% url 'dashboard:student_edit' student.pk %}" class="btn btn-primary btn-sm">Edit Details</a>
+                {% if student.is_active %}
+                    <a href="{% url 'dashboard:student_deactivate' student.pk %}" class="btn btn-action btn-revoke">Deactivate</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Contact Information -->
+            <div>
+                <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                    Contact Details
+                </h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Email Address</span>
+                        <span class="info-value"><a href="mailto:{{ student.email }}">{{ student.email }}</a></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Phone Number</span>
+                        <span class="info-value">{{ student.phone|default:"—" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Information -->
+            <div>
+                <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                    Academic Details
+                </h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">College / Institution</span>
+                        <span class="info-value">{{ student.college|default:"—" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">University</span>
+                        <span class="info-value">{{ student.university|default:"—" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Degree</span>
+                        <span class="info-value">{{ student.degree|default:"—" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Branch / Specialization</span>
+                        <span class="info-value">{{ student.branch|default:"—" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Graduation Year</span>
+                        <span class="info-value">{{ student.graduation_year|default:"—" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Registered On</span>
+                        <span class="info-value">{{ student.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

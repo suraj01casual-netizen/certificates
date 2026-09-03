@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ certificate_title }} - {{ recipient_name }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;600&display=swap');
+
+        @page {
+            size: 297mm 210mm;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 297mm;
+            height: 210mm;
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+            color: #f8fafc;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            overflow: hidden;
+        }
+
+        .modern-cert-canvas {
+            width: 297mm;
+            height: 210mm;
+            padding: 9mm;
+            position: relative;
+            background: #0f172a;
+            box-sizing: border-box;
+        }
+
+        .modern-inner-card {
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 9mm 14mm 8mm 14mm;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Top Accent Gradient Bar */
+        .top-gradient-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 50%, #10b981 100%);
+        }
+
+        /* Subtle Geometric Background Watermark */
+        .bg-geometric-circle {
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.05) 0%, rgba(6, 182, 212, 0.01) 70%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Header Section */
+        .modern-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2mm;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo-img {
+            max-height: 46px;
+            max-width: 140px;
+            object-fit: contain;
+        }
+
+        .brand-text-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-badge {
+            display: inline-block;
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 7.5pt;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-pill-box {
+            text-align: right;
+        }
+
+        .id-capsule {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace;
+            font-size: 8pt;
+            color: #475569;
+        }
+        .id-capsule strong {
+            color: #0f172a;
+        }
+
+        /* Title Area */
+        .title-block {
+            margin: 1.5mm 0 2mm 0;
+        }
+
+        .modern-subtitle {
+            font-family: 'Outfit', sans-serif;
+            font-size: 9pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            color: #4f46e5;
+            margin-bottom: 1mm;
+        }
+
+        .modern-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 26pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+
+        /* Recipient & Main Content */
+        .content-block {
+            margin: 1mm 0 2mm 0;
+        }
+
+        .recipient-intro {
+            font-size: 9.5pt;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 1mm;
+        }
+
+        .modern-recipient-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 28pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            margin: 0 0 2mm 0;
+            display: inline-block;
+        }
+
+        .narrative-text {
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #334155;
+            max-width: 88%;
+        }
+
+        .highlight-program {
+            font-weight: 700;
+            color: #4f46e5;
+        }
+
+        /* Badges / Metrics Pills */
+        .pills-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 3mm;
+            flex-wrap: wrap;
+        }
+
+        .data-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 8pt;
+            color: #475569;
+        }
+
+        .data-pill-label {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 7pt;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+        }
+
+        .data-pill-val {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* Footer Grid */
+        .modern-footer {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-top: 3mm;
+            border-top: 1px solid #f1f5f9;
+            margin-top: 2mm;
+        }
+
+        /* Verification Card */
+        .verification-badge-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 12px;
+            max-width: 38%;
+        }
+
+        .qr-card-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            background: #ffffff;
+            display: block;
+        }
+
+        .verify-badge-info {
+            font-size: 7.5pt;
+            color: #64748b;
+            line-height: 1.3;
+        }
+
+        .verify-live-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #059669;
+            font-weight: 700;
+            font-size: 7pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+        }
+
+        /* Signatory Block */
+        .modern-signatory {
+            text-align: right;
+            min-width: 170px;
+            max-width: 35%;
+        }
+
+        .sig-container {
+            height: 42px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            margin-bottom: 2px;
+        }
+
+        .modern-sig-img {
+            max-height: 38px;
+            max-width: 140px;
+            object-fit: contain;
+        }
+
+        .sig-underline {
+            width: 160px;
+            height: 2px;
+            background: #e2e8f0;
+            margin: 0 0 4px auto;
+        }
+
+        .sig-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 9.5pt;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .sig-title {
+            font-size: 7.5pt;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* Bottom Legal */
+        .bottom-legal-line {
+            text-align: center;
+            font-size: 7pt;
+            color: #94a3b8;
+            margin-top: 1.5mm;
+        }
+    </style>
+</head>
+<body>
+    <div class="modern-cert-canvas">
+        <div class="modern-inner-card">
+            <div class="top-gradient-bar"></div>
+            <div class="bg-geometric-circle"></div>
+
+            <!-- Header -->
+            <div class="modern-header">
+                <div class="brand-group">
+                    {% if logo_data_uri %}
+                        <img src="{{ logo_data_uri }}" alt="Logo" class="brand-logo-img">
+                    {% endif %}
+                    <div>
+                        <div class="brand-text-name">{{ organization_name }}</div>
+                        <span class="brand-badge">Verified Credential</span>
+                    </div>
+                </div>
+
+                <div class="meta-pill-box">
+                    <div class="id-capsule">
+                        <span>ID:</span>
+                        <strong>{{ certificate_id }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div class="title-block">
+                <div class="modern-subtitle">{{ certificate_type_display }}</div>
+                <h1 class="modern-title">{{ certificate_title }}</h1>
+            </div>
+
+            <!-- Body -->
+            <div class="content-block">
+                <div class="recipient-intro">This is officially presented to</div>
+                <div class="modern-recipient-name">{{ recipient_name }}</div>
+                <p class="narrative-text">
+                    for successfully demonstrating proficiency and completing all required coursework and practical assessments for
+                    <strong class="highlight-program">{{ program_name }}</strong>{% if program.department %} within the {{ program.department }} division{% endif %}.
+                </p>
+
+                <!-- Data Pills -->
+                <div class="pills-container">
+                    <div class="data-pill">
+                        <span class="data-pill-label">Issued</span>
+                        <span class="data-pill-val">{{ issue_date|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="data-pill">
+                        <span class="data-pill-label">Timeline</span>
+                        <span class="data-pill-val">{{ start_date|date:"M d, Y" }} &ndash; {% if end_date %}{{ end_date|date:"M d, Y" }}{% else %}Present{% endif %}</span>
+                    </div>
+                    {% if duration %}
+                    <div class="data-pill">
+                        <span class="data-pill-label">Duration</span>
+                        <span class="data-pill-val">{{ duration }} Days</span>
+                    </div>
+                    {% endif %}
+                    {% if student.student_id %}
+                    <div class="data-pill">
+                        <span class="data-pill-label">Student ID</span>
+                        <span class="data-pill-val">{{ student.student_id }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div>
+                <div class="modern-footer">
+                    <!-- QR Verification -->
+                    <div class="verification-badge-card">
+                        {% if qr_data_uri %}
+                            <img src="{{ qr_data_uri }}" alt="Verification QR" class="qr-card-img">
+                        {% endif %}
+                        <div class="verify-badge-info">
+                            <div class="verify-live-pill">
+                                <span class="pulse-dot"></span> Digital Verification
+                            </div>
+                            <div>Instant cryptographic verification active.</div>
+                            {% if company_website %}<div>{{ company_website }}</div>{% endif %}
+                            {% if company_address %}<div>{{ company_address }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Signatory -->
+                    <div class="modern-signatory">
+                        <div class="sig-container">
+                            {% if signature_data_uri %}
+                                <img src="{{ signature_data_uri }}" alt="Signature" class="modern-sig-img">
+                            {% endif %}
+                        </div>
+                        <div class="sig-underline"></div>
+                        <div class="sig-name">{{ signatory_name }}</div>
+                        <div class="sig-title">{{ signatory_title }} &bull; {{ organization_name }}</div>
+                    </div>
+                </div>
+
+                <!-- Bottom Notice -->
+                <div class="bottom-legal-line">
+                    {% if certificate_footer %}
+                        {{ certificate_footer }}
+                    {% else %}
+                        This digital certificate is cryptographically recorded and verified by {{ organization_name }}.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

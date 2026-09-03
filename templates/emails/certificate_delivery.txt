@@ -1,0 +1,26 @@
+{% autoescape off %}Dear {{ student.full_name }},
+
+Congratulations! Your official {{ certificate_type_display }} has been issued by {{ organization_name }}.
+
+Certificate Details:
+--------------------
+Recipient: {{ student.full_name }}
+Program: {{ certificate.program.name }}
+Certificate ID: {{ certificate.certificate_id }}
+Issue Date: {{ certificate.issue_date|date:"F d, Y" }}
+{% if certificate.duration %}Duration: {{ certificate.duration }} Days
+{% endif %}{% if certificate.authorized_signatory %}Signatory: {{ certificate.authorized_signatory.name }} ({{ certificate.authorized_signatory.title }})
+{% endif %}
+
+Verification & Download Links:
+------------------------------
+Online Verification: {{ verification_url }}
+Direct PDF Download: {{ download_url }}
+
+Your official certificate PDF is attached to this email. You can present your unique Certificate ID or share the public verification URL with employers and educational institutions to verify its authenticity.
+
+Regards,
+{{ organization_name }}
+{% if company.website %}{{ company.website }}{% endif %}
+{% if company.email %}{{ company.email }}{% endif %}
+{% endautoescape %}

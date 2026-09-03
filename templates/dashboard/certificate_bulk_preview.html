@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Processing Validation &amp; Preview - CertHub{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="navigation-link">
+        <a href="{% url 'dashboard:certificate_bulk_upload' %}" class="back-link">&larr; Re-upload CSV Spreadsheet</a>
+    </div>
+
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="title-area">
+            <h1>CSV Validation &amp; Issuance Preview</h1>
+            <p class="subtitle">Review row attributes and validation status before confirming batch generation.</p>
+        </div>
+        <div class="action-area">
+            {% if data.is_valid %}
+                <form method="post" action="{% url 'dashboard:certificate_bulk_confirm' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        ⚡ Confirm &amp; Generate {{ data.valid_rows_count }} Certificate{{ data.valid_rows_count|pluralize }}
+                    </button>
+                </form>
+            {% else %}
+                <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.6; cursor: not-allowed;">
+                    ✕ Issuance Blocked (Resolve Errors First)
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Metrics Summary Bar -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
+        <div class="card" style="margin-bottom: 0; padding: 0.75rem 0.95rem;">
+            <div style="font-size: 1.35rem; font-weight: 700; color: #111827; line-height: 1;">{{ data.total_rows }}</div>
+            <div style="font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 0.25rem;">Total Rows in CSV</div>
+        </div>
+        <div class="card" style="margin-bottom: 0; padding: 0.75rem 0.95rem;">
+            <div style="font-size: 1.35rem; font-weight: 700; color: #111827; line-height: 1;">{{ data.valid_rows_count }}</div>
+            <div style="font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 0.25rem;">Valid Rows</div>
+        </div>
+        <div class="card" style="margin-bottom: 0; padding: 0.75rem 0.95rem;">
+            <div style="font-size: 1.35rem; font-weight: 700; color: {% if data.invalid_rows_count > 0 %}#991b1b{% else %}#111827{% endif %}; line-height: 1;">{{ data.invalid_rows_count }}</div>
+            <div style="font-size: 11px; font-weight: 600; color: {% if data.invalid_rows_count > 0 %}#991b1b{% else %}#6b7280{% endif %}; text-transform: uppercase; margin-top: 0.25rem;">Invalid Rows</div>
+        </div>
+    </div>
+
+    <!-- Status Alert Banner -->
+    {% if not data.is_valid %}
+        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; padding: 0.85rem 1rem; margin-bottom: 1rem;">
+            <div style="display: flex; gap: 0.65rem; align-items: flex-start;">
+                <div style="font-size: 1.25rem;">⚠️</div>
+                <div>
+                    <h3 style="margin: 0; font-size: 13px; color: #991b1b; font-weight: 600;">
+                        CSV Validation Failed (Zero-Issuance Policy)
+                    </h3>
+                    <p style="margin: 0.25rem 0 0.5rem 0; color: #7f1d1d; font-size: 12px;">
+                        Found {{ data.invalid_rows_count }} invalid row(s). All errors must be corrected in your CSV before batch issuance can proceed.
+                    </p>
+                    <a href="{% url 'dashboard:certificate_bulk_upload' %}" class="btn btn-secondary btn-sm" style="background-color: #ffffff; color: #991b1b; border-color: #fecaca;">
+                        &larr; Fix CSV &amp; Re-Upload
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Row Errors Table -->
+        {% if data.row_errors %}
+            <div class="list-card">
+                <div class="card-header">
+                    <h2>Row Errors ({{ data.row_errors|length }})</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="student-table">
+                        <thead>
+                            <tr>
+                                <th>Row #</th>
+                                <th>Recipient</th>
+                                <th>Issues Detected</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for err in data.row_errors %}
+                                <tr>
+                                    <td><code style="background: #fef2f2; color: #991b1b; padding: 0.1rem 0.3rem;">Row {{ err.row_num }}</code></td>
+                                    <td><strong>{{ err.identifier|default:"Unknown" }}</strong></td>
+                                    <td>
+                                        <ul style="margin: 0; padding-left: 1rem; color: #991b1b; font-size: 11.5px;">
+                                            {% for e in err.errors %}
+                                                <li>{{ e }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <!-- Valid Rows Preview Table -->
+    {% if data.valid_rows %}
+        <div class="list-card">
+            <div class="card-header">
+                <h2>Ready for Issuance ({{ data.valid_rows|length }})</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student</th>
+                            <th>Email</th>
+                            <th>Program</th>
+                            <th>Type</th>
+                            <th>Template</th>
+                            <th>Signatory</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data.valid_rows %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><strong>{{ row.student_name }}</strong></td>
+                                <td>{{ row.student_email }}</td>
+                                <td>{{ row.program_name }}</td>
+                                <td><span class="type-tag">{{ row.certificate_type }}</span></td>
+                                <td>{{ row.template_name|default:"Default" }}</td>
+                                <td>{{ row.signatory_name|default:"Default" }}</td>
+                                <td><span class="badge badge-success">Valid</span></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

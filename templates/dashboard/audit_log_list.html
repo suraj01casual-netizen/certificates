@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}System Audit Logs - CertHub Admin{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <!-- Page Header -->
+    <div class="header-section">
+        <div class="title-area">
+            <h1>System Audit Logs</h1>
+            <p class="subtitle">Traceability of student, program, and certificate lifecycle operations.</p>
+        </div>
+        <div class="action-area">
+            <a href="{% url 'dashboard:audit_log_list' %}" class="btn btn-secondary btn-sm">
+                🔄 Refresh Logs
+            </a>
+        </div>
+    </div>
+
+    <!-- Metrics Summary Bar (Compact) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
+        <div class="card" style="margin-bottom: 0; padding: 0.75rem 0.95rem;">
+            <div style="font-size: 1.35rem; font-weight: 700; color: #111827; line-height: 1;">{{ total_count }}</div>
+            <div style="font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 0.25rem;">Total Logged Events</div>
+        </div>
+        <div class="card" style="margin-bottom: 0; padding: 0.75rem 0.95rem;">
+            <div style="font-size: 1.35rem; font-weight: 700; color: #111827; line-height: 1;">{{ cert_count }}</div>
+            <div style="font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 0.25rem;">Certificate Operations</div>
+        </div>
+        <div class="card" style="margin-bottom: 0; padding: 0.75rem 0.95rem;">
+            <div style="font-size: 1.35rem; font-weight: 700; color: #111827; line-height: 1;">{{ verify_count }}</div>
+            <div style="font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; margin-top: 0.25rem;">Verifications &amp; Lookups</div>
+        </div>
+    </div>
+
+    <!-- Filters & Search Bar Card -->
+    <div class="search-card">
+        <form method="get" action="{% url 'dashboard:audit_log_list' %}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.65rem; align-items: flex-end;">
+                <!-- Search Query -->
+                <div>
+                    <label class="form-label">Search</label>
+                    <input 
+                        type="text" 
+                        name="q" 
+                        value="{{ q }}" 
+                        placeholder="Object ID, email, IP..." 
+                        class="form-control" 
+                    />
+                </div>
+
+                <!-- Action Filter -->
+                <div>
+                    <label class="form-label">Action</label>
+                    <select name="action" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Actions</option>
+                        {% for act_val, act_label in action_choices %}
+                            <option value="{{ act_val }}" {% if action_selected == act_val %}selected{% endif %}>{{ act_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Object Type Filter -->
+                <div>
+                    <label class="form-label">Object Type</label>
+                    <select name="object_type" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Types</option>
+                        {% for obj_t in object_types %}
+                            <option value="{{ obj_t }}" {% if object_type_selected == obj_t %}selected{% endif %}>{{ obj_t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Timeframe Filter -->
+                <div>
+                    <label class="form-label">Timeframe</label>
+                    <select name="date_range" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Time</option>
+                        <option value="today" {% if date_range_selected == 'today' %}selected{% endif %}>Today</option>
+                        <option value="7days" {% if date_range_selected == '7days' %}selected{% endif %}>Past 7 Days</option>
+                        <option value="30days" {% if date_range_selected == '30days' %}selected{% endif %}>Past 30 Days</option>
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div style="display: flex; gap: 0.35rem;">
+                    <button type="submit" class="btn btn-primary btn-sm" style="flex: 1;">Filter</button>
+                    {% if q or action_selected or object_type_selected or date_range_selected %}
+                        <a href="{% url 'dashboard:audit_log_list' %}" class="btn btn-secondary btn-sm">Clear</a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Logs Table Card -->
+    <div class="list-card">
+        {% if logs %}
+            <div class="table-responsive">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Action</th>
+                            <th>Target Object</th>
+                            <th>Actor / Email</th>
+                            <th>IP Address</th>
+                            <th>Changes / Metadata</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+                                <!-- Timestamp -->
+                                <td style="color: #6b7280; font-size: 11.5px; white-space: nowrap;">
+                                    {{ log.timestamp|date:"M d, Y H:i:s" }}
+                                </td>
+
+                                <!-- Action -->
+                                <td>
+                                    <span class="badge badge-secondary" style="font-size: 11px;">
+                                        {{ log.get_action_display|default:log.action }}
+                                    </span>
+                                </td>
+
+                                <!-- Target Object -->
+                                <td>
+                                    <strong>{{ log.object_type }}</strong>
+                                    {% if log.object_id %}
+                                        <div style="font-size: 11.5px; font-family: monospace; color: #6b7280;">#{{ log.object_id }}</div>
+                                    {% endif %}
+                                </td>
+
+                                <!-- User/Actor -->
+                                <td>
+                                    {% if log.user_email %}
+                                        <span style="font-weight: 500;">{{ log.user_email }}</span>
+                                    {% else %}
+                                        <span style="color: #9ca3af;">System / Public</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- IP Address -->
+                                <td>
+                                    <code style="font-size: 11.5px; background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 2px;">
+                                        {{ log.ip_address|default:"—" }}
+                                    </code>
+                                </td>
+
+                                <!-- Changes / Metadata -->
+                                <td class="truncate-text" style="max-width: 250px;">
+                                    {% if log.changes %}
+                                        <span style="font-family: monospace; font-size: 11px; color: #4b5563;">{{ log.changes }}</span>
+                                    {% else %}
+                                        <span style="color: #9ca3af;">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="pagination-container">
+                    <span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ paginator.count }}</span>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li><a href="?page=1{% if q %}&q={{ q }}{% endif %}{% if action_selected %}&action={{ action_selected }}{% endif %}{% if object_type_selected %}&object_type={{ object_type_selected }}{% endif %}{% if date_range_selected %}&date_range={{ date_range_selected }}{% endif %}" class="page-link">&laquo;</a></li>
+                            <li><a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if action_selected %}&action={{ action_selected }}{% endif %}{% if object_type_selected %}&object_type={{ object_type_selected }}{% endif %}{% if date_range_selected %}&date_range={{ date_range_selected }}{% endif %}" class="page-link">&lsaquo;</a></li>
+                        {% endif %}
+
+                        <li class="page-item active"><span class="page-link active">{{ page_obj.number }}</span></li>
+
+                        {% if page_obj.has_next %}
+                            <li><a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if action_selected %}&action={{ action_selected }}{% endif %}{% if object_type_selected %}&object_type={{ object_type_selected }}{% endif %}{% if date_range_selected %}&date_range={{ date_range_selected }}{% endif %}" class="page-link">&rsaquo;</a></li>
+                            <li><a href="?page={{ paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if action_selected %}&action={{ action_selected }}{% endif %}{% if object_type_selected %}&object_type={{ object_type_selected }}{% endif %}{% if date_range_selected %}&date_range={{ date_range_selected }}{% endif %}" class="page-link">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <div style="text-align: center; padding: 2.5rem 1rem;">
+                <p style="font-size: 1.75rem; margin-bottom: 0.35rem;">📋</p>
+                <h3 style="font-size: 0.95rem; font-weight: 600; color: #111827; margin-bottom: 0.25rem;">No audit events recorded</h3>
+                <p style="font-size: 0.78rem; color: #6b7280;">Lifecycle events will appear here automatically when certificates or records are created, verified, or updated.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

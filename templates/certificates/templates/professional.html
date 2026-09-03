@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ certificate_title }} - {{ recipient_name }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Fira+Mono:wght@400;500;700&display=swap');
+
+        @page {
+            size: 297mm 210mm;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 297mm;
+            height: 210mm;
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            color: #0f172a;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            overflow: hidden;
+        }
+
+        .prof-container {
+            width: 297mm;
+            height: 210mm;
+            padding: 8mm;
+            background: #ffffff;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .prof-border-frame {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #0f172a;
+            padding: 4mm;
+            background: #ffffff;
+            position: relative;
+        }
+
+        .prof-inner-frame {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #94a3b8;
+            padding: 7mm 12mm 6mm 12mm;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        /* Top Header Bar */
+        .prof-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 2mm;
+            border-bottom: 2px solid #0f172a;
+            margin-bottom: 2mm;
+        }
+
+        .prof-org-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .prof-logo-img {
+            max-height: 44px;
+            max-width: 130px;
+            object-fit: contain;
+        }
+
+        .prof-org-name {
+            font-size: 13pt;
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prof-org-sub {
+            font-size: 7.5pt;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .prof-cred-meta {
+            text-align: right;
+            font-size: 8pt;
+            color: #475569;
+        }
+
+        .prof-cred-id {
+            font-family: 'Fira Mono', monospace;
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 8.5pt;
+        }
+
+        /* Certificate Title Header */
+        .prof-title-block {
+            text-align: center;
+            margin: 1mm 0 2mm 0;
+        }
+
+        .prof-sub-title {
+            font-size: 8.5pt;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1mm;
+        }
+
+        .prof-main-title {
+            font-size: 22pt;
+            font-weight: 900;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.1;
+        }
+
+        /* Recipient & Statement */
+        .prof-body {
+            text-align: center;
+            margin: 0.5mm 0;
+        }
+
+        .prof-grant-text {
+            font-family: 'Merriweather', Georgia, serif;
+            font-size: 10pt;
+            color: #475569;
+            font-style: italic;
+            margin-bottom: 1.5mm;
+        }
+
+        .prof-recipient-name {
+            font-size: 24pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.5px;
+            margin: 0 0 1.5mm 0;
+            text-transform: uppercase;
+        }
+
+        .prof-narrative {
+            font-family: 'Merriweather', Georgia, serif;
+            font-size: 9.5pt;
+            line-height: 1.45;
+            color: #334155;
+            max-width: 86%;
+            margin: 0 auto 2mm auto;
+        }
+
+        .prof-prog-bold {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* 2-Column Structured Credential Matrix */
+        .prof-matrix-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 6px 14px;
+            max-width: 86%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            text-align: left;
+        }
+
+        .matrix-item-label {
+            font-size: 6.5pt;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1px;
+        }
+
+        .matrix-item-value {
+            font-size: 8pt;
+            font-weight: 700;
+            color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Footer Grid */
+        .prof-footer-grid {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-top: 2.5mm;
+            border-top: 1px solid #cbd5e1;
+            margin-top: 2mm;
+        }
+
+        /* Verification Panel */
+        .prof-verify-panel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 38%;
+        }
+
+        .prof-qr-img {
+            width: 48px;
+            height: 48px;
+            border: 1px solid #94a3b8;
+            padding: 2px;
+            background: #ffffff;
+            display: block;
+        }
+
+        .prof-verify-desc {
+            font-size: 7pt;
+            color: #64748b;
+            line-height: 1.3;
+        }
+
+        .prof-verify-heading {
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 7.5pt;
+            margin-bottom: 1px;
+        }
+
+        /* Signatory */
+        .prof-signatory-panel {
+            text-align: center;
+            min-width: 170px;
+            max-width: 35%;
+        }
+
+        .prof-sig-space {
+            height: 38px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            margin-bottom: 2px;
+        }
+
+        .prof-sig-img {
+            max-height: 36px;
+            max-width: 140px;
+            object-fit: contain;
+        }
+
+        .prof-sign-line {
+            width: 160px;
+            height: 1px;
+            background: #0f172a;
+            margin: 0 auto 3px auto;
+        }
+
+        .prof-sign-name {
+            font-size: 9pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.5px;
+        }
+
+        .prof-sign-title {
+            font-size: 7pt;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Bottom Status */
+        .prof-bottom-bar {
+            text-align: center;
+            font-size: 6.5pt;
+            color: #94a3b8;
+            margin-top: 1.5mm;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="prof-container">
+        <div class="prof-border-frame">
+            <div class="prof-inner-frame">
+                <!-- Top Corporate Bar -->
+                <div class="prof-top-bar">
+                    <div class="prof-org-info">
+                        {% if logo_data_uri %}
+                            <img src="{{ logo_data_uri }}" alt="Corporate Logo" class="prof-logo-img">
+                        {% endif %}
+                        <div>
+                            <div class="prof-org-name">{{ organization_name }}</div>
+                            <div class="prof-org-sub">Accredited Professional Credential Authority</div>
+                        </div>
+                    </div>
+
+                    <div class="prof-cred-meta">
+                        <div>RECORD ID: <span class="prof-cred-id">{{ certificate_id }}</span></div>
+                        <div>ISSUANCE: <strong>{{ issue_date|date:"F d, Y" }}</strong></div>
+                    </div>
+                </div>
+
+                <!-- Title Section -->
+                <div class="prof-title-block">
+                    <div class="prof-sub-title">Official Attestation of Professional Qualification</div>
+                    <h1 class="prof-main-title">{{ certificate_title }}</h1>
+                </div>
+
+                <!-- Body & Recipient -->
+                <div class="prof-body">
+                    <p class="prof-grant-text">This official credential is hereby conferred upon</p>
+                    <h2 class="prof-recipient-name">{{ recipient_name }}</h2>
+                    <p class="prof-narrative">
+                        who has successfully satisfied all rigorous academic standards, project deliverables, and proficiency metrics prescribed for the
+                        <strong class="prof-prog-bold">{{ program_name }}</strong>{% if program.department %} under the {{ program.department }} division{% endif %}.
+                    </p>
+
+                    <!-- Credential Matrix -->
+                    <div class="prof-matrix-card">
+                        <div>
+                            <div class="matrix-item-label">Start Date</div>
+                            <div class="matrix-item-value">{{ start_date|date:"M d, Y" }}</div>
+                        </div>
+                        <div>
+                            <div class="matrix-item-label">Completion Date</div>
+                            <div class="matrix-item-value">{% if end_date %}{{ end_date|date:"M d, Y" }}{% else %}Present{% endif %}</div>
+                        </div>
+                        <div>
+                            <div class="matrix-item-label">Total Duration</div>
+                            <div class="matrix-item-value">{% if duration %}{{ duration }} Days{% else %}Standard{% endif %}</div>
+                        </div>
+                        <div>
+                            <div class="matrix-item-label">Candidate ID</div>
+                            <div class="matrix-item-value">{% if student.student_id %}{{ student.student_id }}{% else %}REG-{{ student.pk }}{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div>
+                    <div class="prof-footer-grid">
+                        <!-- Verification -->
+                        <div class="prof-verify-panel">
+                            {% if qr_data_uri %}
+                                <img src="{{ qr_data_uri }}" alt="Security QR" class="prof-qr-img">
+                            {% endif %}
+                            <div class="prof-verify-desc">
+                                <div class="prof-verify-heading">Security Verification</div>
+                                <div>Scan QR to validate credential record on the public registry.</div>
+                                {% if company_website %}<div>{{ company_website }}</div>{% endif %}
+                                {% if company_address %}<div>{{ company_address }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Signatory -->
+                        <div class="prof-signatory-panel">
+                            <div class="prof-sig-space">
+                                {% if signature_data_uri %}
+                                    <img src="{{ signature_data_uri }}" alt="Authorized Signature" class="prof-sig-img">
+                                {% endif %}
+                            </div>
+                            <div class="prof-sign-line"></div>
+                            <div class="prof-sign-name">{{ signatory_name }}</div>
+                            <div class="prof-sign-title">{{ signatory_title }} &bull; {{ organization_name }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Bar -->
+                    <div class="prof-bottom-bar">
+                        {% if certificate_footer %}
+                            {{ certificate_footer }}
+                        {% else %}
+                            Certified and authenticated record issued by {{ organization_name }}. Stored securely.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ certificate_title }} - {{ certificate.certificate_id }}</title>
+    <style>
+        @page {
+            size: 297mm 210mm;
+            margin: 0;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            width: 297mm;
+            height: 210mm;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cinzel', 'Playfair Display', 'Georgia', serif;
+            background-color: #ffffff;
+            color: #1a202c;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .certificate-container {
+            width: 297mm;
+            height: 210mm;
+            padding: 9mm;
+            position: relative;
+            background: #ffffff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Outer & Inner Borders */
+        .border-outer {
+            width: 100%;
+            height: 100%;
+            border: 4px solid #1a365d;
+            padding: 3.5mm;
+            position: relative;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .border-inner {
+            width: 100%;
+            height: 100%;
+            border: 1.5px solid #c5a059;
+            padding: 5mm 8mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: radial-gradient(circle at center, #ffffff 60%, #faf8f5 100%);
+            position: relative;
+        }
+
+        /* Corner Decorative Elements */
+        .corner {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-color: #c5a059;
+            border-style: solid;
+        }
+        .corner-tl { top: 6px; left: 6px; border-width: 3px 0 0 3px; }
+        .corner-tr { top: 6px; right: 6px; border-width: 3px 3px 0 0; }
+        .corner-bl { bottom: 6px; left: 6px; border-width: 0 0 3px 3px; }
+        .corner-br { bottom: 6px; right: 6px; border-width: 0 3px 3px 0; }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 2mm;
+        }
+
+        .logo-container {
+            height: 16mm;
+            margin-bottom: 1.5mm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .company-logo {
+            max-height: 16mm;
+            max-width: 45mm;
+            object-fit: contain;
+        }
+
+        .org-name {
+            font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+            font-size: 11pt;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #1a365d;
+        }
+
+        /* Titles */
+        .title-section {
+            text-align: center;
+            margin-bottom: 2mm;
+        }
+
+        .certificate-title {
+            font-size: 23pt;
+            font-weight: 700;
+            letter-spacing: 3.5px;
+            color: #1a365d;
+            text-transform: uppercase;
+            margin-bottom: 1.5mm;
+        }
+
+        .title-divider {
+            width: 65mm;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #c5a059, transparent);
+            margin: 0 auto 2.5mm auto;
+        }
+
+        .presentation-text {
+            font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+            font-size: 8.5pt;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #718096;
+            margin-bottom: 2mm;
+        }
+
+        /* Recipient Name */
+        .recipient-section {
+            text-align: center;
+            margin-bottom: 2.5mm;
+        }
+
+        .recipient-name {
+            font-size: 22pt;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: 1px;
+            padding-bottom: 1mm;
+            border-bottom: 1.5px solid #c5a059;
+            display: inline-block;
+            min-width: 110mm;
+        }
+
+        /* Description / Program */
+        .description-section {
+            text-align: center;
+            font-family: 'Georgia', serif;
+            font-size: 10pt;
+            line-height: 1.45;
+            color: #2d3748;
+            max-width: 210mm;
+            margin: 0 auto 3mm auto;
+        }
+
+        .program-name {
+            font-weight: 700;
+            color: #1a365d;
+            font-size: 10.5pt;
+        }
+
+        /* Metadata Details Bar */
+        .details-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10mm;
+            background: rgba(197, 160, 89, 0.08);
+            border-top: 1px solid rgba(197, 160, 89, 0.3);
+            border-bottom: 1px solid rgba(197, 160, 89, 0.3);
+            padding: 1.8mm 6mm;
+            margin-bottom: 3mm;
+        }
+
+        .detail-item {
+            text-align: center;
+            font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+        }
+
+        .detail-label {
+            font-size: 6.5pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #718096;
+            margin-bottom: 0.5mm;
+        }
+
+        .detail-value {
+            font-size: 8.5pt;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        /* Footer */
+        .footer-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: auto;
+            padding-top: 1mm;
+        }
+
+        .footer-col {
+            flex: 1;
+        }
+
+        /* QR Code Block */
+        .qr-block {
+            display: flex;
+            align-items: center;
+            gap: 3mm;
+        }
+
+        .qr-img {
+            width: 20mm;
+            height: 20mm;
+            border: 1px solid #e2e8f0;
+            padding: 1mm;
+            background: white;
+        }
+
+        .qr-meta {
+            font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+            text-align: left;
+        }
+
+        .cert-id-label {
+            font-size: 6.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+        }
+
+        .cert-id-value {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 8pt;
+            font-weight: 700;
+            color: #1a365d;
+            margin: 0.5mm 0;
+        }
+
+        .cert-verify-hint {
+            font-size: 6pt;
+            color: #a0aec0;
+        }
+
+        /* Seal Emblem */
+        .seal-col {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .seal-emblem {
+            width: 22mm;
+            height: 22mm;
+            border-radius: 50%;
+            border: 2px dashed #c5a059;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5mm;
+            background: radial-gradient(circle, #fffdfa 0%, #fef8ec 100%);
+            box-shadow: 0 0 0 2px #1a365d inset;
+        }
+
+        .seal-text-top {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 5pt;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #1a365d;
+            text-transform: uppercase;
+        }
+
+        .seal-star {
+            font-size: 8pt;
+            color: #c5a059;
+            line-height: 1;
+            margin: 0.5mm 0;
+        }
+
+        .seal-text-bottom {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 4.5pt;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #c5a059;
+            text-transform: uppercase;
+        }
+
+        /* Signatory Block */
+        .signatory-block {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .signature-img-container {
+            height: 12mm;
+            margin-bottom: 1mm;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+
+        .signature-img {
+            max-height: 12mm;
+            max-width: 42mm;
+            object-fit: contain;
+        }
+
+        .sign-line {
+            width: 50mm;
+            border-top: 1.5px solid #1a365d;
+            margin-bottom: 1mm;
+        }
+
+        .signatory-name {
+            font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+            font-size: 9pt;
+            font-weight: 700;
+            color: #1a365d;
+        }
+
+        .signatory-title {
+            font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+            font-size: 7.5pt;
+            color: #4a5568;
+        }
+
+        .signatory-org {
+            font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+            font-size: 6.5pt;
+            color: #718096;
+        }
+
+        .company-footer-bar {
+            margin-top: 1.5mm;
+            padding-top: 0.8mm;
+            border-top: 0.5px solid rgba(197, 160, 89, 0.35);
+            text-align: center;
+            font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+            font-size: 5.5pt;
+            color: #718096;
+            line-height: 1.25;
+        }
+
+        .company-footer-notice {
+            font-style: italic;
+            margin-bottom: 0.3mm;
+            color: #4a5568;
+        }
+
+        .company-footer-contact {
+            letter-spacing: 0.4px;
+        }
+
+        .footer-dot {
+            margin: 0 1.2mm;
+            color: #c5a059;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate-container">
+        <div class="border-outer">
+            <div class="border-inner">
+                <!-- Corner Ornaments -->
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+
+                <!-- Header / Logo -->
+                <div class="header">
+                    {% if logo_data_uri %}
+                        <div class="logo-container">
+                            <img src="{{ logo_data_uri }}" alt="Logo" class="company-logo">
+                        </div>
+                    {% endif %}
+                    <div class="org-name">{{ organization_name }}</div>
+                </div>
+
+                <!-- Title Section -->
+                <div class="title-section">
+                    <h1 class="certificate-title">{{ certificate_title }}</h1>
+                    <div class="title-divider"></div>
+                    <div class="presentation-text">This certificate is proudly awarded to</div>
+                </div>
+
+                <!-- Recipient Name -->
+                <div class="recipient-section">
+                    <div class="recipient-name">{{ certificate.student.full_name }}</div>
+                </div>
+
+                <!-- Description -->
+                <div class="description-section">
+                    for successfully completing the <span class="program-name">{{ certificate.program.name }}</span>
+                    {% if certificate.enrollment and certificate.enrollment.department %}
+                        in the department of <strong>{{ certificate.enrollment.department }}</strong>
+                    {% elif certificate.program.department %}
+                        in the department of <strong>{{ certificate.program.department }}</strong>
+                    {% endif %}
+                    demonstrating excellence and fulfillment of all prescribed academic and practical requirements.
+                </div>
+
+                <!-- Details Metadata Bar -->
+                <div class="details-bar">
+                    <div class="detail-item">
+                        <div class="detail-label">Certificate Type</div>
+                        <div class="detail-value">{{ certificate_type_display }}</div>
+                    </div>
+                    {% if certificate.duration %}
+                        <div class="detail-item">
+                            <div class="detail-label">Duration</div>
+                            <div class="detail-value">{{ certificate.duration }} Days</div>
+                        </div>
+                    {% endif %}
+                    {% if certificate.start_date %}
+                        <div class="detail-item">
+                            <div class="detail-label">Start Date</div>
+                            <div class="detail-value">{{ certificate.start_date|date:"F d, Y" }}</div>
+                        </div>
+                    {% endif %}
+                    {% if certificate.end_date %}
+                        <div class="detail-item">
+                            <div class="detail-label">End Date</div>
+                            <div class="detail-value">{{ certificate.end_date|date:"F d, Y" }}</div>
+                        </div>
+                    {% endif %}
+                    <div class="detail-item">
+                        <div class="detail-label">Issue Date</div>
+                        <div class="detail-value">{{ certificate.issue_date|date:"F d, Y" }}</div>
+                    </div>
+                </div>
+
+                <!-- Footer (QR Code, Seal, Signatory) -->
+                <div class="footer-grid">
+                    <!-- Left: QR Code & ID -->
+                    <div class="footer-col">
+                        <div class="qr-block">
+                            {% if qr_data_uri %}
+                                <img src="{{ qr_data_uri }}" alt="QR Code" class="qr-img">
+                            {% endif %}
+                            <div class="qr-meta">
+                                <div class="cert-id-label">Certificate Identifier</div>
+                                <div class="cert-id-value">{{ certificate.certificate_id }}</div>
+                                <div class="cert-verify-hint">Scan QR to verify authenticity online</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Official Seal -->
+                    <div class="footer-col seal-col">
+                        <div class="seal-emblem">
+                            <div class="seal-text-top">OFFICIAL</div>
+                            <div class="seal-star">&#9733; &#9733; &#9733;</div>
+                            <div class="seal-text-bottom">VERIFIED</div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Authorized Signatory -->
+                    <div class="footer-col signatory-block">
+                        <div class="signature-img-container">
+                            {% if signature_data_uri %}
+                                <img src="{{ signature_data_uri }}" alt="Signature" class="signature-img">
+                            {% endif %}
+                        </div>
+                        <div class="sign-line"></div>
+                        <div class="signatory-name">{{ signatory_name }}</div>
+                        <div class="signatory-title">{{ signatory_title }}</div>
+                        <div class="signatory-org">{{ organization_name }}</div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Company & Legal Footer Notice -->
+                {% if certificate_footer or company_website or company_address %}
+                    <div class="company-footer-bar">
+                        {% if certificate_footer %}
+                            <div class="company-footer-notice">{{ certificate_footer }}</div>
+                        {% endif %}
+                        <div class="company-footer-contact">
+                            {% if company_address %}<span>{{ company_address }}</span>{% endif %}
+                            {% if company_address and company_website %}<span class="footer-dot">&bull;</span>{% endif %}
+                            {% if company_website %}<span>{{ company_website }}</span>{% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

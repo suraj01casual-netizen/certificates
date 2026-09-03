@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Certificate Platform{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="navigation-link">
+        {% if enrollment %}
+            <a href="{% url 'dashboard:enrollment_detail' enrollment.pk %}" class="back-link">&larr; Back to Enrollment Details</a>
+        {% else %}
+            <a href="{% url 'dashboard:enrollment_list' %}" class="back-link">&larr; Back to Enrollment Directory</a>
+        {% endif %}
+    </div>
+
+    <div class="form-card">
+        <div class="card-header">
+            <div>
+                <h1>{{ title }}</h1>
+                <p class="subtitle">Record student enrollment, program assignment, and performance parameters.</p>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-grid">
+                <!-- Student & Program Selection -->
+                <div class="form-section">
+                    <h2>Participant Assignment</h2>
+                    
+                    <div class="form-field">
+                        <label for="{{ form.student.id_for_label }}" class="form-label">Student *</label>
+                        {{ form.student }}
+                        {% if form.student.errors %}
+                            <div class="field-errors">
+                                {% for error in form.student.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.program.id_for_label }}" class="form-label">Program *</label>
+                        {{ form.program }}
+                        {% if form.program.errors %}
+                            <div class="field-errors">
+                                {% for error in form.program.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Timeline & Mentor -->
+                <div class="form-section">
+                    <h2>Timeline &amp; Guidance</h2>
+
+                    <div class="form-field">
+                        <label for="{{ form.start_date.id_for_label }}" class="form-label">Start Date *</label>
+                        {{ form.start_date }}
+                        {% if form.start_date.errors %}
+                            <div class="field-errors">
+                                {% for error in form.start_date.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.end_date.id_for_label }}" class="form-label">End Date *</label>
+                        {{ form.end_date }}
+                        {% if form.end_date.errors %}
+                            <div class="field-errors">
+                                {% for error in form.end_date.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.duration.id_for_label }}" class="form-label">Duration (Days)</label>
+                        {{ form.duration }}
+                        {% if form.duration.errors %}
+                            <div class="field-errors">
+                                {% for error in form.duration.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.mentor.id_for_label }}" class="form-label">Mentor Name *</label>
+                        {{ form.mentor }}
+                        {% if form.mentor.errors %}
+                            <div class="field-errors">
+                                {% for error in form.mentor.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.department.id_for_label }}" class="form-label">Department *</label>
+                        {{ form.department }}
+                        {% if form.department.errors %}
+                            <div class="field-errors">
+                                {% for error in form.department.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.status.id_for_label }}" class="form-label">Enrollment Status *</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <div class="field-errors">
+                                {% for error in form.status.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section" style="margin-bottom: 1rem;">
+                <h2>Project Information</h2>
+
+                <div class="form-field">
+                    <label for="{{ form.project_title.id_for_label }}" class="form-label">Project Title *</label>
+                    {{ form.project_title }}
+                    {% if form.project_title.errors %}
+                        <div class="field-errors">
+                            {% for error in form.project_title.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.project_description.id_for_label }}" class="form-label">Project Description *</label>
+                    {{ form.project_description }}
+                    {% if form.project_description.errors %}
+                        <div class="field-errors">
+                            {% for error in form.project_description.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <!-- Skills & Outcomes -->
+                <div class="form-section">
+                    <h2>Skills &amp; Outcomes</h2>
+
+                    <div class="form-field">
+                        <label for="{{ form.skills_text.id_for_label }}" class="form-label">Skills Acquired (Comma Separated)</label>
+                        {{ form.skills_text }}
+                        {% if form.skills_text.errors %}
+                            <div class="field-errors">
+                                {% for error in form.skills_text.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.learning_outcomes_text.id_for_label }}" class="form-label">Learning Outcomes (Comma Separated)</label>
+                        {{ form.learning_outcomes_text }}
+                        {% if form.learning_outcomes_text.errors %}
+                            <div class="field-errors">
+                                {% for error in form.learning_outcomes_text.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Performance Metrics -->
+                <div class="form-section">
+                    <h2>Performance Evaluation</h2>
+
+                    <div class="form-field">
+                        <label for="{{ form.attendance_percentage.id_for_label }}" class="form-label">Attendance Percentage *</label>
+                        {{ form.attendance_percentage }}
+                        {% if form.attendance_percentage.errors %}
+                            <div class="field-errors">
+                                {% for error in form.attendance_percentage.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.performance_rating.id_for_label }}" class="form-label">Performance Rating (1 to 5) *</label>
+                        {{ form.performance_rating }}
+                        {% if form.performance_rating.errors %}
+                            <div class="field-errors">
+                                {% for error in form.performance_rating.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                {% if enrollment %}
+                    <a href="{% url 'dashboard:enrollment_detail' enrollment.pk %}" class="btn btn-secondary btn-sm">Cancel</a>
+                {% else %}
+                    <a href="{% url 'dashboard:enrollment_list' %}" class="btn btn-secondary btn-sm">Cancel</a>
+                {% endif %}
+                <button type="submit" class="btn btn-primary btn-sm">{{ action|default:"Save Enrollment" }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

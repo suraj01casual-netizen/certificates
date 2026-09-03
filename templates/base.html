@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Certificate Platform{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if user.is_authenticated %}app-authenticated{% else %}app-public{% endif %}">
+{% if user.is_authenticated %}
+    <!-- Unified Authenticated App Shell (Left sidebar touches screen edge, 0 margin/padding) -->
+    <div class="app-layout">
+        <!-- Universal Left Sidebar Navigation Panel -->
+        {% include 'dashboard/components/sidebar.html' %}
+
+        <!-- Main Content Area -->
+        <div class="app-main">
+            <!-- Top Dashboard Navbar -->
+            {% include 'dashboard/components/navbar.html' %}
+
+            <!-- System Alerts / Notifications -->
+            {% if messages %}
+                <div class="app-messages">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Authenticated Page Content -->
+            <main class="app-content">
+{% else %}
+    <!-- Public Unauthenticated Layout -->
+    <div class="public-layout">
+        <nav class="public-navbar">
+            <div class="public-container">
+                <div class="navbar-brand">
+                    <a href="{% url 'home' %}">
+                        <span class="brand-badge-logo">CP</span>
+                        <span class="brand-title">CertHub</span>
+                        <span class="brand-tag">Platform</span>
+                    </a>
+                </div>
+                <div class="public-nav-links">
+                    <a href="{% url 'home' %}" class="nav-public-link">Home</a>
+                    <a href="{% url 'verify:verify_search' %}" class="nav-public-link">Verify Certificate</a>
+                    <a href="{% url 'login' %}" class="nav-login">Sign In</a>
+                </div>
+            </div>
+        </nav>
+
+        {% if messages %}
+            <div class="public-container" style="margin-top: 1rem;">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <main class="public-content public-container">
+{% endif %}
+
+            <!-- Single Content Block for Both Authenticated and Public Templates -->
+            {% block content %}{% endblock %}
+
+{% if user.is_authenticated %}
+            </main>
+            <!-- Dashboard Footer -->
+            {% include 'dashboard/components/footer.html' %}
+        </div>
+    </div>
+    {% include 'dashboard/components/mobile_menu_toggle.html' %}
+{% else %}
+        </main>
+
+        <footer class="public-footer">
+            <div class="public-container">
+                <p>&copy; 2026 CertHub Platform &middot; Verified Digital Credentials Infrastructure</p>
+                <div class="footer-links">
+                    <a href="{% url 'verify:verify_search' %}">Public Verification</a>
+                    <a href="{% url 'login' %}">Issuer Sign In</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+{% endif %}
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Certificate Authenticity - Certificate Platform{% endblock %}
+
+{% block content %}
+<div style="max-width: 640px; margin: 2rem auto; padding: 0 1rem;">
+    <!-- Title & Shield -->
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div style="font-size: 2rem; margin-bottom: 0.35rem;">🛡️</div>
+        <h1 style="font-size: 1.35rem; font-weight: 600; color: #111827; margin: 0 0 0.35rem 0;">Public Certificate Verification</h1>
+        <p style="font-size: 12.5px; color: #6b7280; margin: 0; line-height: 1.4;">
+            Authenticate official credentials issued by our partner institutions. Enter the unique <strong>Certificate ID</strong> or <strong>Verification Token</strong> below.
+        </p>
+    </div>
+
+    <!-- Search Form Card -->
+    <div class="card" style="padding: 1.25rem;">
+        <form method="post" action="{% url 'verify:verify_search' %}">
+            {% csrf_token %}
+            {% if error %}
+                <div class="alert alert-danger" style="margin-bottom: 1rem;">
+                    <span>{{ error }}</span>
+                </div>
+            {% endif %}
+
+            <div class="form-field" style="margin-bottom: 0.85rem;">
+                <label for="queryInput" class="form-label">Certificate Identifier or Token</label>
+                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                    <input 
+                        type="text" 
+                        id="queryInput" 
+                        name="q" 
+                        placeholder="e.g. COMP-INT-2026-000001 or verification token" 
+                        class="form-control" 
+                        style="flex: 1;"
+                        required 
+                        autofocus
+                    />
+                    <button type="submit" class="btn btn-primary" style="padding: 0.4rem 0.85rem;">
+                        🔍 Verify
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; border-top: 1px solid #e5e7eb; padding-top: 1rem; margin-top: 0.5rem;">
+            <div>
+                <strong style="font-size: 11.5px; color: #111827; display: block; margin-bottom: 0.15rem;">⚡ Instant Validation</strong>
+                <p style="font-size: 11px; color: #6b7280; margin: 0; line-height: 1.35;">Real-time query against tamper-proof verification ledger records.</p>
+            </div>
+            <div>
+                <strong style="font-size: 11.5px; color: #111827; display: block; margin-bottom: 0.15rem;">🔒 Cryptographic Proof</strong>
+                <p style="font-size: 11px; color: #6b7280; margin: 0; line-height: 1.35;">Public lookup verifies authenticity with zero exposure of personal data.</p>
+            </div>
+            <div>
+                <strong style="font-size: 11.5px; color: #111827; display: block; margin-bottom: 0.15rem;">📱 QR Integration</strong>
+                <p style="font-size: 11px; color: #6b7280; margin: 0; line-height: 1.35;">Scan any QR code on an issued certificate to jump directly to its proof.</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 1rem; font-size: 11.5px;">
+        <a href="{% url 'home' %}" style="color: #6b7280;">&larr; Back to Home</a>
+    </div>
+</div>
+{% endblock %}

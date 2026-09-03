@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Programs - Certificate Platform{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="header-section">
+        <div class="title-area">
+            <h1>Program Directory</h1>
+            <p class="subtitle">Manage, view, search, and filter educational programs.</p>
+        </div>
+        <div class="action-area">
+            <a href="{% url 'dashboard:program_add' %}" class="btn btn-primary btn-sm">+ Create Program</a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Section -->
+    <div class="search-card">
+        <form method="get" action="{% url 'dashboard:program_list' %}" class="search-form">
+            <div class="search-group" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <input type="text" name="q" value="{{ q }}" placeholder="Search Program ID, Name, Department, Mentor..." class="form-control" style="flex: 2; min-width: 200px;">
+                
+                <select name="program_type" class="form-control" style="flex: 1; min-width: 150px;" onchange="this.form.submit()">
+                    <option value="">All Program Types</option>
+                    {% for p_val, p_label in program_types %}
+                        <option value="{{ p_val }}" {% if program_type == p_val %}selected{% endif %}>{{ p_label }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                {% if q or program_type %}
+                    <a href="{% url 'dashboard:program_list' %}" class="btn btn-secondary btn-sm">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Program List Content (Single-Row Format) -->
+    <div class="list-card">
+        {% if programs %}
+            <div class="table-responsive">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Program ID</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Duration</th>
+                            <th>Mode</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for program in programs %}
+                            <tr>
+                                <td class="id-cell"><code>{{ program.program_id }}</code></td>
+                                <td class="name-cell truncate-text" title="{{ program.name }}">
+                                    <strong>{{ program.name }}</strong>
+                                </td>
+                                <td><span class="type-tag">{{ program.get_program_type_display }}</span></td>
+                                <td>{{ program.duration }} days</td>
+                                <td>{{ program.get_mode_display }}</td>
+                                <td class="truncate-text" title="{{ program.department }}">{{ program.department|default:"—" }}</td>
+                                <td>
+                                    {% if program.is_active %}
+                                        <span class="badge badge-success">Active</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="actions-cell">
+                                    <a href="{% url 'dashboard:program_detail' program.pk %}" class="btn-action btn-view" title="Inspect">Inspect</a>
+                                    <a href="{% url 'dashboard:program_edit' program.pk %}" class="btn-action btn-view" title="Edit program">Edit</a>
+                                    <a href="{% url 'dashboard:program_toggle_active' program.pk %}" class="btn-action btn-revoke" title="Toggle status">
+                                        {% if program.is_active %}Deactivate{% else %}Activate{% endif %}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="pagination-container">
+                    <span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ paginator.count }}</span>
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li><a href="?page=1{% if q %}&q={{ q }}{% endif %}{% if program_type %}&program_type={{ program_type }}{% endif %}" class="page-link">&laquo;</a></li>
+                            <li><a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if program_type %}&program_type={{ program_type }}{% endif %}" class="page-link">&lsaquo;</a></li>
+                        {% endif %}
+
+                        <li class="page-item active"><span class="page-link active">{{ page_obj.number }}</span></li>
+
+                        {% if page_obj.has_next %}
+                            <li><a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if program_type %}&program_type={{ program_type }}{% endif %}" class="page-link">&rsaquo;</a></li>
+                            <li><a href="?page={{ paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if program_type %}&program_type={{ program_type }}{% endif %}" class="page-link">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <div class="empty-state" style="text-align: center; padding: 2.5rem 1rem;">
+                <p style="font-size: 1.75rem; margin-bottom: 0.35rem;">🎓</p>
+                <h3 style="font-size: 0.95rem; font-weight: 600; color: #0f172a; margin-bottom: 0.25rem;">No programs found</h3>
+                <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 0.75rem;">Create a new program or adjust search filters.</p>
+                <a href="{% url 'dashboard:program_add' %}" class="btn btn-primary btn-sm">+ Create Program</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

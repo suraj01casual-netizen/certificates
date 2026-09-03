@@ -1,0 +1,125 @@
+<!-- Stats Cards Component - Compact & Minimal Single Row -->
+<div class="stats-section">
+  <div class="section-header-compact">
+    <h2 class="section-title">System Overview</h2>
+    <span class="section-badge">Live Metrics</span>
+  </div>
+
+  <div class="stats-grid">
+    <!-- Certificates Metric -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-icon-wrapper stat-icon-primary">
+          <span>📜</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Certificates</span>
+          {% if total_certificates %}
+            <span class="stat-subtext">{{ issued_certificates }} Issued &bull; {{ draft_certificates|default:0 }} Draft</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="stat-content">
+        {% if total_certificates %}
+          <div class="stat-metric-wrap">
+            <span class="stat-number">{{ total_certificates }}</span>
+            <a href="{% url 'dashboard:certificate_list' %}" class="stat-link">Manage &rarr;</a>
+          </div>
+        {% else %}
+          <div class="stat-empty-state">
+            <span class="stat-number">0</span>
+            <p class="stat-empty-hint">None issued</p>
+          </div>
+          <a href="{% url 'dashboard:certificate_create' %}" class="stat-link">+ Issue</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Programs Metric -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-icon-wrapper stat-icon-secondary">
+          <span>🎓</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Programs</span>
+          {% if total_programs %}
+            <span class="stat-subtext">Active curricula</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="stat-content">
+        {% if total_programs %}
+          <div class="stat-metric-wrap">
+            <span class="stat-number">{{ total_programs }}</span>
+            <a href="{% url 'dashboard:program_list' %}" class="stat-link">View &rarr;</a>
+          </div>
+        {% else %}
+          <div class="stat-empty-state">
+            <span class="stat-number">0</span>
+            <p class="stat-empty-hint">None created</p>
+          </div>
+          <a href="{% url 'dashboard:program_add' %}" class="stat-link">+ Add</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Students & Enrollments Metric -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-icon-wrapper stat-icon-accent">
+          <span>👥</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Students</span>
+          {% if total_students or total_enrollments %}
+            <span class="stat-subtext">{{ total_enrollments }} enrollments</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="stat-content">
+        {% if total_students or total_enrollments %}
+          <div class="stat-metric-wrap">
+            <span class="stat-number">{{ total_students }}</span>
+            <a href="{% url 'dashboard:student_list' %}" class="stat-link">Directory &rarr;</a>
+          </div>
+        {% else %}
+          <div class="stat-empty-state">
+            <span class="stat-number">0</span>
+            <p class="stat-empty-hint">None registered</p>
+          </div>
+          <a href="{% url 'dashboard:student_add' %}" class="stat-link">+ Add</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Verifications Metric -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <div class="stat-icon-wrapper stat-icon-success">
+          <span>🛡️</span>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Verifications</span>
+          {% if total_verifications %}
+            <span class="stat-subtext">Authenticity checks</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="stat-content">
+        {% if total_verifications %}
+          <div class="stat-metric-wrap">
+            <span class="stat-number">{{ total_verifications }}</span>
+            <a href="{% url 'verify:verify_search' %}" class="stat-link">Verifier &rarr;</a>
+          </div>
+        {% else %}
+          <div class="stat-empty-state">
+            <span class="stat-number">0</span>
+            <p class="stat-empty-hint">No checks yet</p>
+          </div>
+          <a href="{% url 'verify:verify_search' %}" class="stat-link">Verify</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

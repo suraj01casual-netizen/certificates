@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if program.is_active %}Deactivate{% else %}Activate{% endif %} Program - {{ program.name }}
+{% endblock %}
+
+{% block content %}
+<div class="student-management-container" style="max-width: 520px; margin: 2rem auto;">
+    <div class="form-card" style="text-align: center;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">
+            {% if program.is_active %}⚠️{% else %}💡{% endif %}
+        </div>
+        <h1 style="font-size: 1.25rem; font-weight: 600; color: #111827; margin: 0 0 0.4rem 0;">
+            Confirm {% if program.is_active %}Deactivation{% else %}Activation{% endif %}
+        </h1>
+        <p style="font-size: 12.5px; color: #4b5563; margin-bottom: 1rem;">
+            Are you sure you want to {% if program.is_active %}deactivate{% else %}activate{% endif %} <strong>{{ program.name }}</strong>?
+        </p>
+
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 0.75rem 1rem; margin-bottom: 1rem; text-align: left;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 0.25rem;">
+                <span style="color: #6b7280;">Program ID:</span>
+                <span class="id-cell"><code>{{ program.program_id }}</code></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 0.25rem;">
+                <span style="color: #6b7280;">Type:</span>
+                <span style="color: #111827; font-weight: 500;">{{ program.get_program_type_display }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                <span style="color: #6b7280;">Department:</span>
+                <span style="color: #111827;">{{ program.department|default:"—" }}</span>
+            </div>
+        </div>
+
+        <p style="font-size: 11.5px; color: #6b7280; margin-bottom: 1.25rem;">
+            {% if program.is_active %}
+                Deactivating prevents new student enrollments under this curriculum. Historical certificates remain valid.
+            {% else %}
+                Activating makes this program available for new enrollments and certificate creation.
+            {% endif %}
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; justify-content: center; gap: 0.5rem;">
+                <a href="{% url 'dashboard:program_detail' program.pk %}" class="btn btn-secondary btn-sm">Cancel</a>
+                <button type="submit" class="btn btn-primary btn-sm" style="{% if program.is_active %}background-color: #991b1b !important; border-color: #991b1b !important;{% endif %}">
+                    Yes, {% if program.is_active %}Deactivate{% else %}Activate{% endif %} Program
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

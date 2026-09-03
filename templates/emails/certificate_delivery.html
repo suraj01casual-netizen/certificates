@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Certificate of {{ certificate_type_display }} - {{ certificate.certificate_id }}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; -webkit-font-smoothing: antialiased;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f1f5f9; padding: 30px 15px;">
+        <tr>
+            <td align="center">
+                <!-- Main Container -->
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;">
+                    
+                    <!-- Header Banner -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); padding: 36px 30px; text-align: center; color: #ffffff;">
+                            {% if company.logo %}
+                                <div style="margin-bottom: 16px;">
+                                    <span style="font-size: 20pt; font-weight: 800; letter-spacing: 1px; color: #f8fafc; text-transform: uppercase;">{{ organization_name }}</span>
+                                </div>
+                            {% else %}
+                                <div style="font-size: 20pt; font-weight: 800; letter-spacing: 1px; color: #f8fafc; text-transform: uppercase; margin-bottom: 8px;">
+                                    {{ organization_name }}
+                                </div>
+                            {% endif %}
+                            <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 20px; padding: 4px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #e2e8f0;">
+                                Official Credential Issuance
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Body Content -->
+                    <tr>
+                        <td style="padding: 36px 30px;">
+                            <!-- Salutation -->
+                            <h2 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 700; color: #0f172a;">
+                                Congratulations, {{ student.full_name }}!
+                            </h2>
+                            <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #475569;">
+                                We are pleased to inform you that your official <strong>{{ certificate_type_display }}</strong> for completing the <strong>{{ certificate.program.name }}</strong> has been officially issued and cryptographically registered.
+                            </p>
+
+                            <!-- Certificate Summary Card -->
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 28px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                            <tr>
+                                                <td style="padding: 6px 0; font-size: 13px; color: #64748b; width: 40%;">Certificate ID:</td>
+                                                <td style="padding: 6px 0; font-size: 14px; font-weight: 700; color: #0f172a; font-family: monospace;">{{ certificate.certificate_id }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; font-size: 13px; color: #64748b;">Program:</td>
+                                                <td style="padding: 6px 0; font-size: 14px; font-weight: 600; color: #1e293b;">{{ certificate.program.name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; font-size: 13px; color: #64748b;">Type:</td>
+                                                <td style="padding: 6px 0; font-size: 14px; color: #1e293b;">{{ certificate_type_display }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; font-size: 13px; color: #64748b;">Date of Issue:</td>
+                                                <td style="padding: 6px 0; font-size: 14px; color: #1e293b;">{{ certificate.issue_date|date:"F d, Y" }}</td>
+                                            </tr>
+                                            {% if certificate.duration %}
+                                            <tr>
+                                                <td style="padding: 6px 0; font-size: 13px; color: #64748b;">Duration:</td>
+                                                <td style="padding: 6px 0; font-size: 14px; color: #1e293b;">{{ certificate.duration }} Days</td>
+                                            </tr>
+                                            {% endif %}
+                                            {% if certificate.authorized_signatory %}
+                                            <tr>
+                                                <td style="padding: 6px 0; font-size: 13px; color: #64748b;">Signatory:</td>
+                                                <td style="padding: 6px 0; font-size: 14px; color: #1e293b;">{{ certificate.authorized_signatory.name }} ({{ certificate.authorized_signatory.title }})</td>
+                                            </tr>
+                                            {% endif %}
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Action Buttons -->
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 28px;">
+                                <tr>
+                                    <td align="center">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                                            <tr>
+                                                <td style="border-radius: 6px; background-color: #1e3a8a; margin-right: 12px;">
+                                                    <a href="{{ verification_url }}" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 14px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 6px;">
+                                                        &#x2714; Verify Credential Online
+                                                    </a>
+                                                </td>
+                                                <td style="width: 12px;"></td>
+                                                <td style="border-radius: 6px; background-color: #047857;">
+                                                    <a href="{{ download_url }}" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 14px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 6px;">
+                                                        &#x2B07; Download PDF Certificate
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Direct Links for Plain text / Copy -->
+                            <div style="background-color: #f1f5f9; padding: 14px; border-radius: 6px; font-size: 12px; color: #64748b; line-height: 1.5; margin-bottom: 20px;">
+                                <div style="font-weight: 600; color: #475569; margin-bottom: 4px;">Direct URLs:</div>
+                                <div>Verification: <a href="{{ verification_url }}" style="color: #2563eb; word-break: break-all;">{{ verification_url }}</a></div>
+                                <div style="margin-top: 4px;">Download: <a href="{{ download_url }}" style="color: #2563eb; word-break: break-all;">{{ download_url }}</a></div>
+                            </div>
+
+                            <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #64748b;">
+                                Your official certificate is attached to this email as a PDF document. You can share your verification link with employers, academic institutions, and on your LinkedIn profile.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 24px 30px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; line-height: 1.5;">
+                            <div style="font-weight: 600; color: #64748b; margin-bottom: 4px;">{{ organization_name }}</div>
+                            {% if company.address %}<div>{{ company.address }}</div>{% endif %}
+                            {% if company.website %}<div>Website: <a href="{{ company.website }}" style="color: #64748b;">{{ company.website }}</a></div>{% endif %}
+                            {% if company.email %}<div>Support: <a href="mailto:{{ company.email }}" style="color: #64748b;">{{ company.email }}</a></div>{% endif %}
+                            <div style="margin-top: 12px; font-size: 11px; color: #cbd5e1;">
+                                This is an automated notification. Please do not reply directly to this email.
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

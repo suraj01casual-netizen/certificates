@@ -1,0 +1,38 @@
+<!-- Quick Actions Component (Compact & Minimal) -->
+<div class="quick-actions-section">
+  <div class="section-header-compact">
+    <h2 class="section-title">Quick Actions</h2>
+  </div>
+
+  <div class="actions-grid">
+    <a href="{% url 'dashboard:certificate_create' %}" class="action-btn action-btn-primary">
+      <span class="action-icon">➕</span>
+      <span class="action-text">Issue Certificate</span>
+    </a>
+
+    <a href="{% url 'dashboard:certificate_bulk_upload' %}" class="action-btn">
+      <span class="action-icon">📁</span>
+      <span class="action-text">Bulk Issue (CSV)</span>
+    </a>
+
+    <a href="{% url 'dashboard:student_add' %}" class="action-btn">
+      <span class="action-icon">👤</span>
+      <span class="action-text">Add Student</span>
+    </a>
+
+    <a href="{% url 'dashboard:program_add' %}" class="action-btn">
+      <span class="action-icon">🎓</span>
+      <span class="action-text">Add Program</span>
+    </a>
+
+    <a href="{% url 'dashboard:enrollment_add' %}" class="action-btn">
+      <span class="action-icon">📝</span>
+      <span class="action-text">Add Enrollment</span>
+    </a>
+
+    <a href="{% url 'dashboard:signatory_add' %}" class="action-btn">
+      <span class="action-icon">✍️</span>
+      <span class="action-text">Add Signatory</span>
+    </a>
+  </div>
+</div>

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Enrollment Details - {{ enrollment.enrollment_id }}{% endblock %}
+
+{% block content %}
+<div class="student-management-container">
+    <div class="navigation-link">
+        <a href="{% url 'dashboard:enrollment_list' %}" class="back-link">&larr; Back to Enrollment Directory</a>
+    </div>
+
+    <div class="detail-card">
+        <!-- Header -->
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <div style="width: 38px; height: 38px; border-radius: 4px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                    📝
+                </div>
+                <div>
+                    <h1 style="font-size: 1.15rem; font-weight: 600; color: #111827; margin: 0;">{{ enrollment.project_title|default:enrollment.program.name }}</h1>
+                    <div style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.2rem;">
+                        <span class="id-cell"><code>{{ enrollment.enrollment_id }}</code></span>
+                        <span class="badge badge-success">{{ enrollment.get_status_display }}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.35rem; align-items: center;">
+                <a href="{% url 'dashboard:enrollment_edit' enrollment.pk %}" class="btn btn-primary btn-sm">Edit Details</a>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <!-- Student & Program Info -->
+            <div>
+                <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                    Participant &amp; Program Details
+                </h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Student Name</span>
+                        <span class="info-value"><strong>{{ enrollment.student.full_name }}</strong></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Student ID</span>
+                        <span class="info-value"><code>{{ enrollment.student.student_id }}</code></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Student Email</span>
+                        <span class="info-value">{{ enrollment.student.email }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Program</span>
+                        <span class="info-value">{{ enrollment.program.name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Program ID</span>
+                        <span class="info-value"><code>{{ enrollment.program.program_id }}</code></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Program Type</span>
+                        <span class="info-value">{{ enrollment.program.get_program_type_display }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline & Mentor -->
+            <div>
+                <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                    Timeline &amp; Guidance
+                </h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Start Date</span>
+                        <span class="info-value">{{ enrollment.start_date|date:"F d, Y" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">End Date</span>
+                        <span class="info-value">{{ enrollment.end_date|date:"F d, Y" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Duration</span>
+                        <span class="info-value">{{ enrollment.duration }} Days</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Mentor</span>
+                        <span class="info-value">{{ enrollment.mentor|default:"—" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Department</span>
+                        <span class="info-value">{{ enrollment.department|default:"—" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Performance Grade</span>
+                        <span class="info-value">{{ enrollment.grade|default:"Satisfactory" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            {% if enrollment.skills %}
+                <div>
+                    <h2 style="font-size: 0.875rem; font-weight: 600; color: #111827; padding-bottom: 0.35rem; margin-bottom: 0.65rem; border-bottom: 1px solid #e5e7eb;">
+                        Skills &amp; Deliverables
+                    </h2>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                        {% for skill in enrollment.skills %}
+                            <span class="badge badge-secondary">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
