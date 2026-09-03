@@ -1,0 +1,35 @@
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Git & IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Local databases & logs
+db.sqlite3
+db.sqlite3-journal
+*.log
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Static & Media temporary files
+staticfiles/
+
+# Agent & Knowledge Graph artifacts
+.agents/
+graphify-out/
+scratch/
