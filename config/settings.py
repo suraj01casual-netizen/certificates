@@ -185,10 +185,25 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 # Email configuration
-# Supports Resend (HTTPS API over port 443, required on Railway free tier), SMTP, or Console
+# Supports:
+# 1. Gmail REST API (over HTTPS port 443, unlimited 500 emails/day free on Railway)
+# 2. Resend REST API (via Anymail)
+# 3. Standard SMTP / Console fallback
+GMAIL_REFRESH_TOKEN = os.environ.get("GMAIL_REFRESH_TOKEN", "")
+GMAIL_CLIENT_ID = os.environ.get("GMAIL_CLIENT_ID", "")
+GMAIL_CLIENT_SECRET = os.environ.get("GMAIL_CLIENT_SECRET", "")
+
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 
-if RESEND_API_KEY:
+if GMAIL_REFRESH_TOKEN and GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET:
+    EMAIL_BACKEND = "certificates.gmail_backend.GmailApiEmailBackend"
+    DEFAULT_FROM_EMAIL = os.environ.get(
+        "DEFAULT_FROM_EMAIL", "CertHub <apnabazzar.learn@gmail.com>"
+    )
+    DEFAULT_REPLY_TO = os.environ.get(
+        "DEFAULT_REPLY_TO", "apnabazzar.learn@gmail.com"
+    )
+elif RESEND_API_KEY:
     EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
     ANYMAIL = {
         "RESEND_API_KEY": RESEND_API_KEY,
@@ -211,6 +226,7 @@ else:
     EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
     EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
     DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "webmaster@localhost")
+    DEFAULT_REPLY_TO = os.environ.get("DEFAULT_REPLY_TO", "apnabazzar.learn@gmail.com")
 
 # Site URL for public verification links and QR code generation
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")

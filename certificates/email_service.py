@@ -155,16 +155,12 @@ class CertificateEmailService:
             html_body = render_to_string(cls.HTML_TEMPLATE, context)
             text_body = render_to_string(cls.TXT_TEMPLATE, context)
 
-            reply_to_email = getattr(settings, "DEFAULT_REPLY_TO", None) or os.environ.get("REPLY_TO_EMAIL", "")
-            reply_to = [reply_to_email.strip()] if reply_to_email and reply_to_email.strip() else None
-
             # Construct EmailMultiAlternatives message
             msg = EmailMultiAlternatives(
                 subject=subject,
                 body=text_body,
                 from_email=from_email,
                 to=[recipient_email],
-                reply_to=reply_to,
             )
             msg.attach_alternative(html_body, "text/html")
 
