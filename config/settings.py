@@ -195,6 +195,9 @@ GMAIL_CLIENT_SECRET = os.environ.get("GMAIL_CLIENT_SECRET", "")
 
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 
+# 5-second socket timeout so network blocks never hang Gunicorn workers
+EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", 5))
+
 if GMAIL_REFRESH_TOKEN and GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET:
     EMAIL_BACKEND = "certificates.gmail_backend.GmailApiEmailBackend"
     DEFAULT_FROM_EMAIL = os.environ.get(
@@ -215,9 +218,10 @@ elif RESEND_API_KEY:
         "DEFAULT_REPLY_TO", "apnabazzar.learn@gmail.com"
     )
 else:
+    # Default to console so an unconfigured SMTP never blocks or crashes the app
     EMAIL_BACKEND = os.environ.get(
         "EMAIL_BACKEND",
-        "django.core.mail.backends.console.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend"
+        "django.core.mail.backends.console.EmailBackend"
     )
     EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
     EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))

@@ -182,41 +182,53 @@ class CertificateEmailService:
                         pdf_err,
                     )
 
-            # Send email
-            msg.send(fail_silently=False)
+            # Send email safely
+            email_delivered = False
+            try:
+                sent_count = msg.send(fail_silently=fail_silently)
+                if sent_count and sent_count > 0:
+                    email_delivered = True
+                    certificate.email_sent = True
+                    certificate.email_sent_at = timezone.now()
+                    certificate.save(update_fields=["email_sent", "email_sent_at"])
+            except Exception as send_err:
+                logger.warning(
+                    "Email transmission error for cert %s: %s",
+                    certificate.certificate_id,
+                    send_err,
+                )
+                if not fail_silently:
+                    raise
+                return False, str(send_err)
 
-            # Update certificate model delivery flags
-            certificate.email_sent = True
-            certificate.email_sent_at = timezone.now()
-            certificate.save(update_fields=["email_sent", "email_sent_at"])
+            # Record in AuditLog if delivered
+            if email_delivered:
+                user_email = (
+                    getattr(user, "email", None)
+                    if user and getattr(user, "is_authenticated", False)
+                    else None
+                )
+                AuditLog.objects.create(
+                    action="EMAIL",
+                    object_type="Certificate",
+                    object_id=certificate.certificate_id,
+                    user_email=user_email,
+                    changes={
+                        "status": "SENT",
+                        "recipient_email": recipient_email,
+                        "student_name": student.full_name,
+                        "certificate_id": certificate.certificate_id,
+                        "timestamp": str(certificate.email_sent_at),
+                    },
+                    ip_address=ip_address,
+                )
 
-            # Record success in AuditLog
-            user_email = (
-                getattr(user, "email", None)
-                if user and getattr(user, "is_authenticated", False)
-                else None
-            )
-            AuditLog.objects.create(
-                action="EMAIL",
-                object_type="Certificate",
-                object_id=certificate.certificate_id,
-                user_email=user_email,
-                changes={
-                    "status": "SENT",
-                    "recipient_email": recipient_email,
-                    "student_name": student.full_name,
-                    "certificate_id": certificate.certificate_id,
-                    "timestamp": str(certificate.email_sent_at),
-                },
-                ip_address=ip_address,
-            )
-
-            logger.info(
-                "Certificate email successfully sent to %s for cert %s",
-                recipient_email,
-                certificate.certificate_id,
-            )
-            return True, None
+                logger.info(
+                    "Certificate email successfully sent to %s for cert %s",
+                    recipient_email,
+                    certificate.certificate_id,
+                )
+            return email_delivered, None
 
         except Exception as exc:
             err_msg = str(exc)
