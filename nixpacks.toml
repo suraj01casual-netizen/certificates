@@ -1,8 +1,9 @@
-# Nixpacks configuration for Railway with WeasyPrint C-libraries support
+providers = ["...", "python"]
 
 [phases.setup]
 nixPkgs = [
     "...",
+    "python3",
     "cairo",
     "pango",
     "gobject-introspection",
