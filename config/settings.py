@@ -196,6 +196,9 @@ if RESEND_API_KEY:
     DEFAULT_FROM_EMAIL = os.environ.get(
         "DEFAULT_FROM_EMAIL", "CertHub <onboarding@resend.dev>"
     )
+    DEFAULT_REPLY_TO = os.environ.get(
+        "DEFAULT_REPLY_TO", "apnabazzar.learn@gmail.com"
+    )
 else:
     EMAIL_BACKEND = os.environ.get(
         "EMAIL_BACKEND",
