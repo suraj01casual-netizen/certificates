@@ -2,6 +2,7 @@
 
 [phases.setup]
 nixPkgs = [
+    "...",
     "cairo",
     "pango",
     "gobject-introspection",
